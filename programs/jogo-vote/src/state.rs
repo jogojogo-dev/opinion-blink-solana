@@ -4,8 +4,9 @@ use anchor_lang::prelude::*;
 pub struct JoGoVoteState {
     pub admin: Pubkey,
     pub bump: u8,
-    pub max_vote_numbers: u64,
+    pub max_vote_numbers: u8,
     pub total_voter_numbers: u64,
+    pub each_vote_numbers: [u8; 256],
 }
 
 impl JoGoVoteState {
@@ -15,7 +16,7 @@ impl JoGoVoteState {
 #[account]
 pub struct VoteAccount {
     pub voter: Pubkey,
-    pub voted_number: u64,
+    pub voted_number: u8,
     pub is_voted: bool,
     pub bump: u8,
 }

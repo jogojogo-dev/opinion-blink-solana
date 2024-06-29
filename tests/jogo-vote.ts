@@ -9,7 +9,7 @@ describe("jogo-vote", () => {
 
   const program = anchor.workspace.JogoVote as Program<JogoVote>;
   const payer = anchor.web3.Keypair.generate();
-  const maxVoteNumbers = new anchor.BN(10);
+  const maxVoteNumbers = 10;
   const [stateAccountKey, stateAccountBump] = anchor.web3.PublicKey.findProgramAddressSync(
       [Buffer.from('state'), payer.publicKey.toBuffer()],
       program.programId
@@ -37,7 +37,7 @@ describe("jogo-vote", () => {
   it("Multiple vote", async () => {
     for (let i = 0; i < 10; i++) {
       const voter = anchor.web3.Keypair.generate();
-      const randomVoteNumber = new anchor.BN(Math.floor(Math.random() * 9) + 1)
+      const randomVoteNumber =Math.floor(Math.random() * 9) + 1
       const [voteAccountPDA, bump] = anchor.web3.PublicKey.findProgramAddressSync(
           [
             Buffer.from("vote_account"),
@@ -59,7 +59,9 @@ describe("jogo-vote", () => {
     const voteAccounts = await program.account.voteAccount.all();
     console.log("VoteAccounts: ", voteAccounts.length);
     voteAccounts.map((voteAccount) => {
-      console.log(voteAccount.account.voter.toBase58(), voteAccount.account.votedNumber.toNumber());
+      console.log(voteAccount.account.voter.toBase58(), voteAccount.account.votedNumber);
     })
+    const stateAccount = await program.account.joGoVoteState.fetch(stateAccountKey);
+    console.log("StateAccount: ", stateAccount);
   });
 });
