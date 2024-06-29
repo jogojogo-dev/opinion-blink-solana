@@ -1,7 +1,7 @@
 import * as anchor from "@coral-xyz/anchor";
 import { Program } from "@coral-xyz/anchor";
 import { JogoVote } from "../target/types/jogo_vote";
-import {BlockheightBasedTransactionConfirmationStrategy} from "@solana/web3.js";
+
 
 describe("jogo-vote", () => {
   // Configure the client to use the local cluster.

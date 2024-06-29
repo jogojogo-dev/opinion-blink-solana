@@ -16,3 +16,4 @@ wallet = "/Users/raytlty/.config/solana/id.json"
 
 [scripts]
 test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"
+init-jogo-state = "ts-node initialize/init_state.ts"
