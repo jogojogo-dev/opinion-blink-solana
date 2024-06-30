@@ -6,8 +6,11 @@ import {
     SystemProgram, Keypair, Connection
 } from '@solana/web3.js';
 import BN from "bn.js"
-import dotenv from 'dotenv';
 import {sha256} from "crypto-hash";
+import * as borsh from 'borsh';
+import * as anchor from "@coral-xyz/anchor";
+import * as path from "node:path";
+import * as fs from "node:fs";
 
 const connection = new Connection("http://localhost:8899")
 const voteProgramId = new PublicKey("62TKbRM9rPsUu5kKeGUkoqP5M4CyLiVSogfaVT1uJFLQ")
@@ -81,4 +84,57 @@ async function vote() {
     }
 }
 
-vote()
+class VoteAccount {
+    voter: PublicKey;
+    votedNumber: number;
+    isVoted: boolean;
+    bump: number;
+
+    constructor(properties: { voter: Uint8Array, votedNumber: number, isVoted: number, bump: number }) {
+        this.voter = new PublicKey(properties.voter);
+        this.votedNumber = properties.votedNumber;
+        this.isVoted = properties.isVoted === 1; // convert to boolean
+        this.bump = properties.bump;
+    }
+
+    static schema: borsh.Schema = new Map([
+        [VoteAccount, {
+            kind: 'struct',
+            fields: [
+                ['voter', [32]], // PublicKey is stored as 32 bytes
+                ['votedNumber', 'u8'], // 1 byte for u8
+                ['isVoted', 'u8'], // 1 byte for boolean (stored as u8 in IDL)
+                ['bump', 'u8'], // 1 byte for u8
+            ]
+        }]
+    ]);
+}
+
+// TypeScript interface matching the IDL structure of VoteAccount
+interface VoteAccount {
+    voter: PublicKey;
+    votedNumber: number;
+    isVoted: boolean;
+    bump: number;
+}
+
+async function voteAccounts() {
+    const idlPath = path.resolve(__dirname, "../target/idl/jogo_vote.json");
+    const idl = JSON.parse(fs.readFileSync(idlPath, "utf-8"));
+    const provider = new anchor.AnchorProvider(connection, new anchor.Wallet(payer), { commitment: "confirmed" });
+    const program = new anchor.Program(idl, voteProgramId, provider);
+    const voteAccounts = await program.account.voteAccount.all() as anchor.ProgramAccount<VoteAccount>[];
+    console.log("VoteAccounts: ", voteAccounts.length);
+    voteAccounts.map((voteAccount) => {
+        const { voter, votedNumber, isVoted, bump } = voteAccount.account;
+
+        console.log({
+            voter: new PublicKey(voter).toBase58(),
+            votedNumber,
+            isVoted,
+            bump
+        });
+    })
+}
+
+voteAccounts()
