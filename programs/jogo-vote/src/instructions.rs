@@ -24,8 +24,9 @@ pub struct Vote<'info> {
     )]
     pub state: Account<'info, JoGoVoteState>,
     // Add other accounts as needed
-    #[account(mut)]
+    #[account(mut, signer)]
     pub payer: Signer<'info>,
+    #[account(signer)]
     pub voter: Signer<'info>,
     #[account(
         init_if_needed,
