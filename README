@@ -1,0 +1,34 @@
+# JoGoVote Solana Program
+
+## Build
+
+```
+anchor keys sync
+anchor build -p=jogo_vote
+```
+
+## Solana CLI Deploy
+
+```
+solana program deploy \
+    -k=.keypairs/deployer.json \
+    -u=devnet \
+    --with-compute-unit-price=<0.00005> \
+    --buffer=<YOUR_BUFFER_ACCOUNT> \
+    --use-quic \
+    --commitment=processed \
+    --program-id=target/deploy/jogo_vote-keypair.json \
+    target/deploy/jogo_vote.so
+```
+
+## Deploy
+
+```
+anchor deploy --program-name=<PROGRAM_NAME> --program-keypair=<KEYPAIR>
+```
+
+## Upgrade
+
+```
+anchor upgrade -p <PROGRAM_ID> target/deploy/jogo_vote.so
+```
