@@ -18,6 +18,7 @@ async function main() {
         [Buffer.from('state'), payer.publicKey.toBuffer()],
         program.programId
     );
+    console.log(stateAccountKey.toBase58())
     const tx = await program.methods.initialize(4).accounts({
       state: stateAccountKey,
       admin: payer.publicKey,
