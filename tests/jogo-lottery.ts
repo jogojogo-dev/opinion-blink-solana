@@ -9,7 +9,7 @@ describe("jogo-lottery", () => {
     const admin = anchor.web3.Keypair.generate();
     const users = Array.from({length: 10}, () => anchor.web3.Keypair.generate());
     const encoder = new TextEncoder();
-    const poolId = Array.from(encoder.encode("uec2024".padEnd(32, '\0')));
+    const poolId = Array.from(encoder.encode("euro2024".padEnd(32, '\0')));
     const deadline = Date.now() + 1000;
     const [lotteryPoolPDA, lotteryPoolBump] = anchor.web3.PublicKey.findProgramAddressSync(
         [
