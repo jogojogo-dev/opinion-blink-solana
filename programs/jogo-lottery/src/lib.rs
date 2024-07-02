@@ -28,9 +28,10 @@ pub mod jogo_lottery {
 
     pub fn prepare_draw_lottery(
         ctx: Context<DrawLotteryPool>,
-        winning_number: u64
+        winning_number: u64,
+        bonus_lottery_prize: u64
     ) -> Result<()> {
-        _draw_lottery_pool(ctx, winning_number)
+        _draw_lottery_pool(ctx, winning_number, bonus_lottery_prize)
     }
 
     pub fn buy_lottery_ticket(

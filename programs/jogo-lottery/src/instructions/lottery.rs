@@ -6,7 +6,6 @@ use crate::state::{LotteryPool, UserLottery};
 use crate::error::JoGoLotteryErrorCode;
 
 const ENTRY_LOTTERY_FEE: u64 = 10_000_000;
-const BONUS_LOTTERY_PRIZE: u64 = 500_000_000_000;
 
 #[derive(Accounts)]
 #[instruction(vote_number: u64)]
@@ -124,7 +123,7 @@ pub struct DrawLotteryPoolEvent {
     pub winning_number: u64,
 }
 
-pub(crate) fn _draw_lottery_pool(ctx: Context<DrawLotteryPool>, winning_number: u64) -> Result<()> {
+pub(crate) fn _draw_lottery_pool(ctx: Context<DrawLotteryPool>, winning_number: u64, bonus_lottery_prize: u64) -> Result<()> {
     let lottery_pool = &mut ctx.accounts.lottery_pool;
     require!(lottery_pool.maximum_number >= winning_number && 0 < winning_number, JoGoLotteryErrorCode::InvalidWinningNumber);
     lottery_pool.is_drawn = true;
@@ -137,9 +136,9 @@ pub(crate) fn _draw_lottery_pool(ctx: Context<DrawLotteryPool>, winning_number: 
         },
     );
     // transfer bonus lottery prize
-    transfer(cpi_ctx, BONUS_LOTTERY_PRIZE)?;
+    transfer(cpi_ctx, bonus_lottery_prize)?;
 
-    lottery_pool.bonus_prize += BONUS_LOTTERY_PRIZE;
+    lottery_pool.bonus_prize += bonus_lottery_prize;
     emit!(DrawLotteryPoolEvent {
         pool_id: lottery_pool.pool_id,
         lottery_pool: lottery_pool.key(),

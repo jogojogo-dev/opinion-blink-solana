@@ -58,7 +58,7 @@ describe("jogo-lottery", () => {
         console.log("Initialize transaction signature", tx);
     });
 
-    it("Multiple vote", async () => {
+    it("Multiple buy lottery", async () => {
         for (let i = 0; i < 10; i++) {
             const randomVoteNumber =Math.floor(Math.random() * 4) + 1
             if (Math.floor(Math.random()) % 2 == 0) {
@@ -95,7 +95,7 @@ describe("jogo-lottery", () => {
         let lotteryPool = await program.account.lotteryPool.fetch(lotteryPoolPDA)
         assert.equal(lotteryPool.isDrawn, false, "Lottery pool should not be drawn");
         assert.equal(randomWinningNumber != 0, true, "Can not be zero");
-        const tx = await program.methods.prepareDrawLottery(new anchor.BN(randomWinningNumber)).accounts({
+        const tx = await program.methods.prepareDrawLottery(new anchor.BN(randomWinningNumber), new anchor.BN(500_000_000_000)).accounts({
             admin: admin.publicKey,
             vaultAccount: lotteryPoolVaultPDA,
             lotteryPool:lotteryPoolPDA,
