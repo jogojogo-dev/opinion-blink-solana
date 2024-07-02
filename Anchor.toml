@@ -16,7 +16,8 @@ cluster = "https://devnet.sonic.game"
 wallet = ".keypairs/deployer.json"
 
 [scripts]
-init-jogo-state = "ts-node initialize/init_state.ts"
+init-jogo-vote = "ts-node initialize/init_vote.ts"
+init-jogo-lottery = "ts-node initialize/init_lottery.ts"
 test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"
 test-jogo-vote = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/jogo-vote.ts"
 test-jogo-lottery = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/jogo-lottery.ts"

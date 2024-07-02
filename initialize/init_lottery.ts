@@ -3,7 +3,6 @@ import {Program} from "@coral-xyz/anchor";
 import {Keypair, PublicKey} from "@solana/web3.js";
 import { JogoLottery } from "../target/types/jogo_lottery";
 
-
 async function main() {
     const provider = anchor.AnchorProvider.env();
     anchor.setProvider(provider);
@@ -11,7 +10,7 @@ async function main() {
     const admin = provider.wallet as anchor.Wallet
     const encoder = new TextEncoder();
     const poolId = Array.from(encoder.encode("euro2024".padEnd(32, '\0')));
-    const deadline = new Date().getTime() + 1000 * 60 * 60 * 24 * 7;
+    const deadline = new Date().getTime() + 1000 * 60 * 60 * 24 * 365;
     const [lotteryPoolPDA, lotteryPoolBump] = anchor.web3.PublicKey.findProgramAddressSync(
         [
             Buffer.from("lottery_pool"),
@@ -20,6 +19,7 @@ async function main() {
         ],
         program.programId
     )
+    console.log(`LotteryPool: ${lotteryPoolPDA.toBase58()}`)
     const [lotteryPoolVaultPDA, lotteryPoolVaultBump] = anchor.web3.PublicKey.findProgramAddressSync(
         [
             Buffer.from("lottery_pool_sol"),
@@ -28,6 +28,7 @@ async function main() {
         ],
         program.programId
     )
+    console.log(`LotteryPoolVault: ${lotteryPoolVaultPDA.toBase58()}`)
     const tx = await program.methods.initLotteryPool(poolId, new anchor.BN(4), new anchor.BN(deadline)).accounts({
         admin: admin.publicKey,
         vaultAccount: lotteryPoolVaultPDA,
