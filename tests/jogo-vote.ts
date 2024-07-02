@@ -37,7 +37,7 @@ describe("jogo-vote", () => {
   it("Multiple vote", async () => {
     for (let i = 0; i < 10; i++) {
       const voter = anchor.web3.Keypair.generate();
-      const randomVoteNumber =Math.floor(Math.random() * 9) + 1
+      const randomVoteNumber =Math.floor(Math.random() * 10) + 1
       const [voteAccountPDA, bump] = anchor.web3.PublicKey.findProgramAddressSync(
           [
             Buffer.from("vote_account"),
@@ -52,16 +52,16 @@ describe("jogo-vote", () => {
         voteAccount: voteAccountPDA,
         systemProgram: anchor.web3.SystemProgram.programId,
       }).signers([payer, voter]).rpc();
-      console.log("Vote transaction signature", tx);
-      const voteAccountData = await program.account.voteAccount.fetch(voteAccountPDA);
-      console.log("VoteAccount Data: ", voteAccountData);
+      // console.log("Vote transaction signature", tx);
+      // const voteAccountData = await program.account.voteAccount.fetch(voteAccountPDA);
+      // console.log("VoteAccount Data: ", voteAccountData);
     }
-    const voteAccounts = await program.account.voteAccount.all();
-    console.log("VoteAccounts: ", voteAccounts.length);
-    voteAccounts.map((voteAccount) => {
-      console.log(voteAccount.account.voter.toBase58(), voteAccount.account.votedNumber);
-    })
-    const stateAccount = await program.account.joGoVoteState.fetch(stateAccountKey);
-    console.log("StateAccount: ", stateAccount);
+    // const voteAccounts = await program.account.voteAccount.all();
+    // console.log("VoteAccounts: ", voteAccounts.length);
+    // voteAccounts.map((voteAccount) => {
+    //   console.log(voteAccount.account.voter.toBase58(), voteAccount.account.votedNumber);
+    // })
+    // const stateAccount = await program.account.joGoVoteState.fetch(stateAccountKey);
+    // console.log("StateAccount: ", stateAccount);
   });
 });

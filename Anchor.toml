@@ -16,5 +16,7 @@ cluster = "Localnet"
 wallet = "/Users/raytlty/.config/solana/id.json"
 
 [scripts]
-init-jogo-state = "ts-node initialize/init_state.ts"
 test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"
+init-jogo-state = "ts-node initialize/init_state.ts"
+test-jogo-vote = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/jogo-vote.ts"
+test-jogo-lottery = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/jogo-lottery.ts"

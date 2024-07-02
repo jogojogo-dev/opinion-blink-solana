@@ -13,6 +13,7 @@ pub struct LotteryPool {
     pub is_initialized: bool,
     pub is_drawn: bool,
     pub bump: u8,
+    pub vault_bump: u8,
     pub pool_id: [u8;32],
 }
 

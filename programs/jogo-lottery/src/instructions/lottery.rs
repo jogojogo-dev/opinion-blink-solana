@@ -15,6 +15,8 @@ pub struct EnterLotteryPool<'info> {
     pub user: Signer<'info>,
     #[account(mut, constraint = ! lottery_pool.is_drawn @ JoGoLotteryErrorCode::AlreadyDrawnPool)]
     pub lottery_pool: Account<'info, LotteryPool>,
+    #[account(mut)]
+    pub vault_account: SystemAccount<'info>,
     #[account(
         init_if_needed,
         payer = user,
@@ -35,6 +37,8 @@ pub struct EnterLotteryPool<'info> {
 pub struct DrawLotteryPool<'info> {
     #[account(mut)]
     pub admin: Signer<'info>,
+    #[account(mut)]
+    pub vault_account: SystemAccount<'info>,
     #[account(mut, has_one = admin, constraint = ! lottery_pool.is_drawn @ JoGoLotteryErrorCode::AlreadyDrawnPool)]
     lottery_pool: Account<'info, LotteryPool>,
     system_program: Program<'info, System>,
@@ -44,6 +48,8 @@ pub struct DrawLotteryPool<'info> {
 pub struct ClaimPrize<'info> {
     #[account(mut, has_one = owner)]
     pub user_lottery: Account<'info, UserLottery>,
+    #[account(mut)]
+    pub vault_account: SystemAccount<'info>,
     #[account(mut)]
     pub owner: Signer<'info>,
     #[account(mut, constraint = lottery_pool.is_drawn @ JoGoLotteryErrorCode::PoolNotClosed)]
@@ -91,7 +97,7 @@ pub(crate) fn _enter_lottery_pool(
         ctx.accounts.system_program.to_account_info(),
         Transfer {
             from: ctx.accounts.user.to_account_info(),
-            to: lottery_pool.to_account_info(),
+            to: ctx.accounts.vault_account.to_account_info(),
         },
     );
     // transfer entry lottery fee
@@ -128,7 +134,7 @@ pub(crate) fn _draw_lottery_pool(ctx: Context<DrawLotteryPool>, winning_number: 
         ctx.accounts.system_program.to_account_info(),
         Transfer {
             from: ctx.accounts.admin.to_account_info(),
-            to: lottery_pool.to_account_info(),
+            to: ctx.accounts.vault_account.to_account_info(),
         },
     );
     // transfer bonus lottery prize
@@ -167,12 +173,18 @@ pub(crate) fn _claim_prize(ctx: Context<ClaimPrize>) -> Result<()> {
     require!(prize + lottery_pool.claimed_prize <= lottery_pool.bonus_prize + lottery_pool.prize, JoGoLotteryErrorCode::InsufficientPrize);
 
     lottery_pool.claimed_prize += prize;
-    let cpi_ctx = CpiContext::new(
+
+    let admin_key = lottery_pool.admin.key();
+    let lottery_pool_key = lottery_pool.key();
+    let seeds = &[b"lottery_pool_sol", admin_key.as_ref(), lottery_pool_key.as_ref(), &[lottery_pool.vault_bump]];
+    let signed_seeds = [&seeds[..]];
+    let cpi_ctx = CpiContext::new_with_signer(
         ctx.accounts.system_program.to_account_info(),
         Transfer {
-            from: lottery_pool.to_account_info(),
+            from: ctx.accounts.vault_account.to_account_info(),
             to: ctx.accounts.owner.to_account_info(),
         },
+        &signed_seeds
     );
     transfer(cpi_ctx, prize)?;
     emit!(ClaimPrizeEvent {

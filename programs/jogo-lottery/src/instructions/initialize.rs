@@ -11,7 +11,6 @@ pub struct InitLotteryPool<'info> {
     pub admin: Signer<'info>,
     #[account(
         init_if_needed,
-        has_one = admin,
         payer = admin,
         space = 8 + std::mem::size_of::< LotteryPool>(),
         seeds = [
@@ -22,6 +21,12 @@ pub struct InitLotteryPool<'info> {
         bump
     )]
     pub lottery_pool: Account<'info, LotteryPool>,
+    #[account(
+        mut,
+        seeds = [b"lottery_pool_sol", admin.key().as_ref(), lottery_pool.key().as_ref()],
+        bump
+    )]
+    pub vault_account: SystemAccount<'info>,
     pub system_program: Program<'info, System>,
 }
 
@@ -47,6 +52,7 @@ pub(crate) fn _init_lottery_pool(
     require!(timestamp <= deadline, JoGoLotteryErrorCode::InvalidDeadline);
     lottery_pool.is_initialized = true;
     lottery_pool.bump = ctx.bumps.lottery_pool;
+    lottery_pool.vault_bump = ctx.bumps.vault_account;
     lottery_pool.admin = ctx.accounts.admin.key();
     lottery_pool.pool_id = pool_id;
     lottery_pool.winning_number = 0; // initialize to 0
