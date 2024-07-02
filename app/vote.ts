@@ -12,9 +12,9 @@ import * as anchor from "@coral-xyz/anchor";
 import * as path from "node:path";
 import * as fs from "node:fs";
 
-const connection = new Connection("http://localhost:8899")
-const voteProgramId = new PublicKey("62TKbRM9rPsUu5kKeGUkoqP5M4CyLiVSogfaVT1uJFLQ")
-const stateAccount = new PublicKey("5QsxJuht8VuDfkf45RDj1Mw6su547NGCDE37pDwZ5xce")
+const connection = new Connection("https://devnet.sonic.game")
+const voteProgramId = new PublicKey("Dh8AmCC1J8FUD6GnzJtc6hQhUhgndVbBbkKY6HyAa2nv")
+const stateAccount = new PublicKey("CWRUSwjGuzkwQL7RhbKVgDs1vnLjT8mRzEp5pqhgG838")
 const payerSecretKeyString = process.env.PAYER_SECRET_KEY;
 if (!payerSecretKeyString) {
     throw new Error("PAYER_SECRET_KEY not found in .env file");
@@ -126,6 +126,7 @@ async function voteAccounts() {
     const voteAccounts = await program.account.voteAccount.all() as anchor.ProgramAccount<VoteAccount>[];
     console.log("VoteAccounts: ", voteAccounts.length);
     voteAccounts.map((voteAccount) => {
+        console.log(voteAccount.publicKey)
         const { voter, votedNumber, isVoted, bump } = voteAccount.account;
 
         console.log({
