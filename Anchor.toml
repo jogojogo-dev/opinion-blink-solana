@@ -6,17 +6,17 @@ skip-lint = false
 
 [programs.localnet]
 jogo-lottery = "CTMfMAsohXbSQa5TFTqFPpQdoQ88dUv77saWE1zXcrMq"
-jogo_vote = "62TKbRM9rPsUu5kKeGUkoqP5M4CyLiVSogfaVT1uJFLQ"
+jogo_vote = "Dh8AmCC1J8FUD6GnzJtc6hQhUhgndVbBbkKY6HyAa2nv"
 
 [registry]
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "Localnet"
-wallet = "/Users/raytlty/.config/solana/id.json"
+cluster = "https://devnet.sonic.game"
+wallet = ".keypairs/deployer.json"
 
 [scripts]
-test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"
 init-jogo-state = "ts-node initialize/init_state.ts"
 test-jogo-vote = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/jogo-vote.ts"
 test-jogo-lottery = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/jogo-lottery.ts"
+test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"

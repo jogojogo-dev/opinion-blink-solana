@@ -9,7 +9,7 @@ pub use constants::*;
 pub use instructions::*;
 pub use state::*;
 
-declare_id!("62TKbRM9rPsUu5kKeGUkoqP5M4CyLiVSogfaVT1uJFLQ");
+declare_id!("Dh8AmCC1J8FUD6GnzJtc6hQhUhgndVbBbkKY6HyAa2nv");
 
 #[program]
 pub mod jogo_vote {
