@@ -1110,6 +1110,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "jogo-lottery"
+version = "0.1.0"
+dependencies = [
+ "anchor-lang",
+ "anchor-spl",
+]
+
+[[package]]
 name = "jogo-vote"
 version = "0.1.0"
 dependencies = [
