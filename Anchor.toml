@@ -4,7 +4,7 @@
 seeds = false
 skip-lint = false
 
-[programs.localnet]
+[programs.devnet]
 jogo-lottery = "CTMfMAsohXbSQa5TFTqFPpQdoQ88dUv77saWE1zXcrMq"
 jogo_vote = "Dh8AmCC1J8FUD6GnzJtc6hQhUhgndVbBbkKY6HyAa2nv"
 
