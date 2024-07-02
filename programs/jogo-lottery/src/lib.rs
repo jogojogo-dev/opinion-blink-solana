@@ -17,10 +17,6 @@ declare_id!("CTMfMAsohXbSQa5TFTqFPpQdoQ88dUv77saWE1zXcrMq");
 pub mod jogo_lottery {
     use super::*;
 
-    pub fn init_lottery(ctx: Context<InitLottery>) -> Result<()> {
-        _init_lottery(ctx)
-    }
-
     pub fn init_lottery_pool(
         ctx: Context<InitLotteryPool>,
         pool_id: [u8;32],

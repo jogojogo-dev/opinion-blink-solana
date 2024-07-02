@@ -1,3 +1,3 @@
 mod lottery;
 
-pub use lottery::{Lottery, LotteryPool, UserLottery};
+pub use lottery::{LotteryPool, UserLottery};

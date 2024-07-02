@@ -1,15 +1,8 @@
 use anchor_lang::prelude::*;
 
 #[account]
-pub struct Lottery {
-    pub admin: Pubkey,
-    pub is_initialized: bool,
-    pub bump: u8,
-}
-
-#[account]
 pub struct LotteryPool {
-    pub owner: Pubkey,
+    pub admin: Pubkey,
     pub prize: u64,
     pub bonus_prize: u64,
     pub claimed_prize: u64,

@@ -2,7 +2,7 @@ use anchor_lang::prelude::*;
 use anchor_lang::solana_program::clock::Clock;
 use anchor_lang::system_program::{Transfer, transfer};
 
-use crate::state::{Lottery, LotteryPool, UserLottery};
+use crate::state::{LotteryPool, UserLottery};
 use crate::error::JoGoLotteryErrorCode;
 
 const ENTRY_LOTTERY_FEE: u64 = 10_000_000;
@@ -13,8 +13,6 @@ const BONUS_LOTTERY_PRIZE: u64 = 500_000_000_000;
 pub struct EnterLotteryPool<'info> {
     #[account(mut)]
     pub user: Signer<'info>,
-    #[account(mut)]
-    pub lottery: Account<'info, Lottery>,
     #[account(mut, constraint = ! lottery_pool.is_drawn @ JoGoLotteryErrorCode::AlreadyDrawnPool)]
     pub lottery_pool: Account<'info, LotteryPool>,
     #[account(
@@ -37,9 +35,7 @@ pub struct EnterLotteryPool<'info> {
 pub struct DrawLotteryPool<'info> {
     #[account(mut)]
     pub admin: Signer<'info>,
-    #[account(mut)]
-    pub lottery: Account<'info, Lottery>,
-    #[account(mut, constraint = ! lottery_pool.is_drawn @ JoGoLotteryErrorCode::AlreadyDrawnPool)]
+    #[account(mut, has_one = admin, constraint = ! lottery_pool.is_drawn @ JoGoLotteryErrorCode::AlreadyDrawnPool)]
     lottery_pool: Account<'info, LotteryPool>,
     system_program: Program<'info, System>,
 }
@@ -50,8 +46,6 @@ pub struct ClaimPrize<'info> {
     pub user_lottery: Account<'info, UserLottery>,
     #[account(mut)]
     pub owner: Signer<'info>,
-    #[account(mut)]
-    pub lottery: Account<'info, Lottery>,
     #[account(mut, constraint = lottery_pool.is_drawn @ JoGoLotteryErrorCode::PoolNotClosed)]
     pub lottery_pool: Account<'info, LotteryPool>,
     system_program: Program<'info, System>,
@@ -126,13 +120,7 @@ pub struct DrawLotteryPoolEvent {
 }
 
 pub(crate) fn _draw_lottery_pool(ctx: Context<DrawLotteryPool>, winning_number: u64) -> Result<()> {
-    let lottery = &mut ctx.accounts.lottery;
     let lottery_pool = &mut ctx.accounts.lottery_pool;
-    require!(
-        ctx.accounts.admin.key() == lottery.admin.key() ||
-        ctx.accounts.admin.key() == lottery_pool.owner.key(),
-        JoGoLotteryErrorCode::InvalidAdminRole
-    );
     require!(lottery_pool.maximum_number >= winning_number && 0 < winning_number, JoGoLotteryErrorCode::InvalidWinningNumber);
     lottery_pool.is_drawn = true;
     lottery_pool.winning_number = winning_number;
