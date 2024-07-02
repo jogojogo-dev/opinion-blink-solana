@@ -9,7 +9,6 @@ pub struct LotteryPool {
     pub maximum_number: u64,
     pub winning_number: u64,
     pub deadline: u64,
-    pub total_votes: u64,
     pub is_initialized: bool,
     pub is_drawn: bool,
     pub bump: u8,

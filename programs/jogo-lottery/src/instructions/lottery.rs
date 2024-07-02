@@ -81,7 +81,6 @@ pub(crate) fn _enter_lottery_pool(
     require!(timestamp < lottery_pool.deadline, JoGoLotteryErrorCode::LotteryPoolEnded);
 
     if user_lottery.owner == Pubkey::default() {
-        lottery_pool.total_votes += 1;
         user_lottery.owner = ctx.accounts.user.key();
         user_lottery.bump = ctx.bumps.user_lottery;
         user_lottery.vote_number = vote_number;

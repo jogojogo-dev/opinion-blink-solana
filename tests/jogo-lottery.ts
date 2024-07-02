@@ -88,7 +88,6 @@ describe("jogo-lottery", () => {
             // console.log("UserLottery Data: ", userLotteryData);
         }
         const lotteryPool = await program.account.lotteryPool.fetch(lotteryPoolPDA)
-        assert.equal(lotteryPool.totalVotes.toNumber(), 10, "Total votes should be 10");
         assert.equal(lotteryPool.prize.toNumber(), 100_000_000, "Total prize should be 100_000_000")
     });
 

@@ -56,7 +56,6 @@ pub(crate) fn _init_lottery_pool(
     lottery_pool.admin = ctx.accounts.admin.key();
     lottery_pool.pool_id = pool_id;
     lottery_pool.winning_number = 0; // initialize to 0
-    lottery_pool.total_votes = 0;
     lottery_pool.maximum_number = maximum_number;
     lottery_pool.is_drawn = false;
     lottery_pool.prize = 0;
