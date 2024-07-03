@@ -58,6 +58,7 @@ pub(crate) fn _init_lottery_pool(
     lottery_pool.bonus_prize = 0;
     lottery_pool.claimed_prize = 0;
     lottery_pool.votes_prize = [0; MAX_VOTE_NUMBERS];
+    lottery_pool.claimed_count = 0;
     emit!(InitLotteryPoolEvent {
         admin: lottery_pool.admin,
         lottery_pool: lottery_pool.key(),
