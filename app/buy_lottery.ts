@@ -12,6 +12,7 @@ import {sha256} from "crypto-hash";
 import path from "node:path";
 import fs from "node:fs";
 import * as anchor from "@coral-xyz/anchor";
+import {IDL, JogoLottery} from '../types/jogo_lottery'
 
 const connection = new Connection("https://devnet.sonic.game")
 const payerSecretKeyString = process.env.PAYER_SECRET_KEY;
@@ -119,13 +120,11 @@ interface UserLottery {
 }
 
 async function getUserLotteries(network: Network) {
-    const idlPath = path.resolve(__dirname, "../target/idl/jogo_lottery.json");
-    const idl = JSON.parse(fs.readFileSync(idlPath, "utf-8"));
     const provider = new anchor.AnchorProvider(connection, new anchor.Wallet(payer), {commitment: "confirmed"});
     const programId = new PublicKey(programIds[network]);
 
-    const program = new anchor.Program(idl, programId, provider);
-    const userLotteryAccounts = await program.account.userLottery.all() as anchor.ProgramAccount<UserLottery>[];
+    const program = new anchor.Program<JogoLottery>(IDL, programId, provider);
+    const userLotteryAccounts = await program.account.userLottery.all()
     console.log("UserLotteryAccounts: ", userLotteryAccounts.length);
     userLotteryAccounts.map((userLottery) => {
         const {owner, lotteryPool, balance, voteNumber, bump, isClaimed} = userLottery.account;
@@ -144,7 +143,7 @@ async function getUserLotteries(network: Network) {
 
 async function getTotalUserAtVoteNumber(network: Network, voteNumber: number) {
     const userLotteries = await getUserLotteries(network);
-    return userLotteries.filter((userLottery) => userLottery.account.voteNumber === voteNumber).length
+    return userLotteries.filter((userLottery) => userLottery.account.voteNumber.toNumber() === voteNumber).length
 }
 
 async function checkUserHasVoteNumber(network: Network, userPubKey: PublicKey, voteNumber: number) {
