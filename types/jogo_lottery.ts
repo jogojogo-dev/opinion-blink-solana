@@ -46,10 +46,6 @@ export type JogoLottery = {
         {
           "name": "maximumNumber",
           "type": "u64"
-        },
-        {
-          "name": "deadline",
-          "type": "u64"
         }
       ]
     },
@@ -154,6 +150,32 @@ export type JogoLottery = {
         }
       ],
       "args": []
+    },
+    {
+      "name": "closeLotteryPool",
+      "accounts": [
+        {
+          "name": "admin",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "lotteryPool",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "vaultAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
     }
   ],
   "accounts": [
@@ -187,10 +209,6 @@ export type JogoLottery = {
             "type": "u64"
           },
           {
-            "name": "deadline",
-            "type": "u64"
-          },
-          {
             "name": "isInitialized",
             "type": "bool"
           },
@@ -214,6 +232,19 @@ export type JogoLottery = {
                 32
               ]
             }
+          },
+          {
+            "name": "votesPrize",
+            "type": {
+              "array": [
+                "u64",
+                8
+              ]
+            }
+          },
+          {
+            "name": "claimedCount",
+            "type": "u64"
           }
         ]
       }
@@ -237,6 +268,10 @@ export type JogoLottery = {
           },
           {
             "name": "voteNumber",
+            "type": "u64"
+          },
+          {
+            "name": "claimedPrize",
             "type": "u64"
           },
           {
@@ -267,11 +302,6 @@ export type JogoLottery = {
         },
         {
           "name": "maximumNumber",
-          "type": "u64",
-          "index": false
-        },
-        {
-          "name": "deadline",
           "type": "u64",
           "index": false
         }
@@ -406,36 +436,46 @@ export type JogoLottery = {
     },
     {
       "code": 6008,
+      "name": "MaxVoteNumberExceed",
+      "msg": "Max vote number exceed"
+    },
+    {
+      "code": 6009,
+      "name": "LotteryPoolCanNotClose",
+      "msg": "LotteryPool still leave unclaimed"
+    },
+    {
+      "code": 6010,
       "name": "InvalidAdminRole",
       "msg": "Invalid admin role"
     },
     {
-      "code": 6009,
+      "code": 6011,
       "name": "InvalidDeadline",
       "msg": "Invalid deadline"
     },
     {
-      "code": 6010,
+      "code": 6012,
       "name": "InvalidVoteNumber",
       "msg": "Invalid vote number"
     },
     {
-      "code": 6011,
+      "code": 6013,
       "name": "InvalidPoolId",
       "msg": "Invalid pool id"
     },
     {
-      "code": 6012,
+      "code": 6014,
       "name": "InvalidUser",
       "msg": "Invalid user"
     },
     {
-      "code": 6013,
+      "code": 6015,
       "name": "InvalidTimestamp",
       "msg": "Invalid timestamp"
     },
     {
-      "code": 6014,
+      "code": 6016,
       "name": "InvalidWinningNumber",
       "msg": "Invalid winning number"
     }
@@ -490,10 +530,6 @@ export const IDL: JogoLottery = {
         {
           "name": "maximumNumber",
           "type": "u64"
-        },
-        {
-          "name": "deadline",
-          "type": "u64"
         }
       ]
     },
@@ -598,6 +634,32 @@ export const IDL: JogoLottery = {
         }
       ],
       "args": []
+    },
+    {
+      "name": "closeLotteryPool",
+      "accounts": [
+        {
+          "name": "admin",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "lotteryPool",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "vaultAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
     }
   ],
   "accounts": [
@@ -631,10 +693,6 @@ export const IDL: JogoLottery = {
             "type": "u64"
           },
           {
-            "name": "deadline",
-            "type": "u64"
-          },
-          {
             "name": "isInitialized",
             "type": "bool"
           },
@@ -658,6 +716,19 @@ export const IDL: JogoLottery = {
                 32
               ]
             }
+          },
+          {
+            "name": "votesPrize",
+            "type": {
+              "array": [
+                "u64",
+                8
+              ]
+            }
+          },
+          {
+            "name": "claimedCount",
+            "type": "u64"
           }
         ]
       }
@@ -681,6 +752,10 @@ export const IDL: JogoLottery = {
           },
           {
             "name": "voteNumber",
+            "type": "u64"
+          },
+          {
+            "name": "claimedPrize",
             "type": "u64"
           },
           {
@@ -711,11 +786,6 @@ export const IDL: JogoLottery = {
         },
         {
           "name": "maximumNumber",
-          "type": "u64",
-          "index": false
-        },
-        {
-          "name": "deadline",
           "type": "u64",
           "index": false
         }
@@ -850,36 +920,46 @@ export const IDL: JogoLottery = {
     },
     {
       "code": 6008,
+      "name": "MaxVoteNumberExceed",
+      "msg": "Max vote number exceed"
+    },
+    {
+      "code": 6009,
+      "name": "LotteryPoolCanNotClose",
+      "msg": "LotteryPool still leave unclaimed"
+    },
+    {
+      "code": 6010,
       "name": "InvalidAdminRole",
       "msg": "Invalid admin role"
     },
     {
-      "code": 6009,
+      "code": 6011,
       "name": "InvalidDeadline",
       "msg": "Invalid deadline"
     },
     {
-      "code": 6010,
+      "code": 6012,
       "name": "InvalidVoteNumber",
       "msg": "Invalid vote number"
     },
     {
-      "code": 6011,
+      "code": 6013,
       "name": "InvalidPoolId",
       "msg": "Invalid pool id"
     },
     {
-      "code": 6012,
+      "code": 6014,
       "name": "InvalidUser",
       "msg": "Invalid user"
     },
     {
-      "code": 6013,
+      "code": 6015,
       "name": "InvalidTimestamp",
       "msg": "Invalid timestamp"
     },
     {
-      "code": 6014,
+      "code": 6016,
       "name": "InvalidWinningNumber",
       "msg": "Invalid winning number"
     }
