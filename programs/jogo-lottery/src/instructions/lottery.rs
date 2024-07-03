@@ -72,12 +72,9 @@ pub(crate) fn _enter_lottery_pool(
     ctx: Context<EnterLotteryPool>,
     vote_number: u64,
 ) -> Result<()> {
-    let clock: Clock = Clock::get().unwrap();
-    let timestamp: u64 = clock.unix_timestamp.try_into().map_err(|_| error!(JoGoLotteryErrorCode::InvalidTimestamp))?;
     let user_lottery = &mut ctx.accounts.user_lottery;
     let lottery_pool = &mut ctx.accounts.lottery_pool;
     require!(vote_number > 0 && vote_number <= lottery_pool.maximum_number, JoGoLotteryErrorCode::InvalidVoteNumber);
-    require!(timestamp < lottery_pool.deadline, JoGoLotteryErrorCode::LotteryPoolEnded);
 
     if user_lottery.owner == Pubkey::default() {
         user_lottery.owner = ctx.accounts.user.key();
@@ -85,6 +82,7 @@ pub(crate) fn _enter_lottery_pool(
         user_lottery.vote_number = vote_number;
         user_lottery.lottery_pool = lottery_pool.key();
         user_lottery.is_claimed = false;
+        user_lottery.claimed_prize = 0;
     } else {
         // check if the user has already entered the lottery pool
         require!(user_lottery.vote_number == vote_number, JoGoLotteryErrorCode::InvalidVoteNumber);
@@ -101,6 +99,7 @@ pub(crate) fn _enter_lottery_pool(
     // transfer entry lottery fee
     transfer(cpi_ctx, ENTRY_LOTTERY_FEE)?;
 
+    lottery_pool.votes_prize[vote_number as usize] += ENTRY_LOTTERY_FEE;
     user_lottery.balance += ENTRY_LOTTERY_FEE;
     lottery_pool.prize += ENTRY_LOTTERY_FEE;
     emit!(EnterLotteryPoolEvent {
@@ -166,11 +165,12 @@ pub(crate) fn _claim_prize(ctx: Context<ClaimPrize>) -> Result<()> {
     require!(!user_lottery.is_claimed, JoGoLotteryErrorCode::AlreadyClaimed);
     user_lottery.is_claimed = true;
 
-    let prize = (lottery_pool.bonus_prize + lottery_pool.prize) * user_lottery.balance / lottery_pool.prize;
+    let prize = lottery_pool.calculate_prize(user_lottery.balance);
     require!(prize > 0, JoGoLotteryErrorCode::NoPrize);
     require!(prize + lottery_pool.claimed_prize <= lottery_pool.bonus_prize + lottery_pool.prize, JoGoLotteryErrorCode::InsufficientPrize);
 
     lottery_pool.claimed_prize += prize;
+    user_lottery.claimed_prize = prize;
 
     let admin_key = lottery_pool.admin.key();
     let lottery_pool_key = lottery_pool.key();

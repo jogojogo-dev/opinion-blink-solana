@@ -49,7 +49,7 @@ describe("jogo-lottery", () => {
     })
 
     it("Initialize LotteryPool", async () => {
-        const tx = await program.methods.initLotteryPool(poolId, new anchor.BN(4), new anchor.BN(deadline)).accounts({
+        const tx = await program.methods.initLotteryPool(poolId, new anchor.BN(4)).accounts({
             admin: admin.publicKey,
             vaultAccount: lotteryPoolVaultPDA,
             lotteryPool:lotteryPoolPDA,
@@ -108,7 +108,11 @@ describe("jogo-lottery", () => {
     })
 
     it("Claim prize", async() => {
-        let balanceBefore = await program.provider.connection.getBalance(lotteryPoolVaultPDA);
+        let vaultBalanceBefore = await program.provider.connection.getBalance(lotteryPoolVaultPDA);
+        let lotteryPoolData = await program.account.lotteryPool.fetch(lotteryPoolPDA)
+        let prize = lotteryPoolData.prize
+        let bonusPrize = lotteryPoolData.bonusPrize
+        let votesPrize = lotteryPoolData.votesPrize
         for (let i = 0; i < 10; i++) {
             let userLotteryKey: anchor.web3.PublicKey;
             try {
@@ -125,7 +129,6 @@ describe("jogo-lottery", () => {
                 if (userLotteryData.balance.toNumber() == 0) continue;
                 userLotteryKey = userLotteryPDA
             } catch (e) {
-                // console.log(e)
                 continue
             }
             const tx = await program.methods.claimPrize().accounts({
@@ -136,8 +139,15 @@ describe("jogo-lottery", () => {
                 systemProgram: anchor.web3.SystemProgram.programId,
             }).signers([users[i]]).rpc();
             console.log("Claim prize transaction signature", tx);
+            const userLotteryData = await program.account.userLottery.fetch(userLotteryKey);
+            let claimedReward = userLotteryData.balance.mul(prize.add(bonusPrize)).div(votesPrize[randomWinningNumber])
+            assert.isAtMost(
+                userLotteryData.claimedPrize.toNumber(),
+                claimedReward.toNumber(),
+                "Claim reward should be equal to balance"
+            )
         }
-        let balanceAfter = await program.provider.connection.getBalance(lotteryPoolVaultPDA);
-        assert.isBelow(balanceAfter, balanceBefore, "Balance after should be below balance before");
+        let vaultBalanceAfter = await program.provider.connection.getBalance(lotteryPoolVaultPDA);
+        assert.isBelow(vaultBalanceAfter, vaultBalanceBefore, "Balance after should be below balance before");
     })
 });

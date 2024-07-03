@@ -81,6 +81,10 @@ export type JogoLottery = {
         {
           "name": "winningNumber",
           "type": "u64"
+        },
+        {
+          "name": "bonusLotteryPrize",
+          "type": "u64"
         }
       ]
     },
@@ -520,6 +524,10 @@ export const IDL: JogoLottery = {
       "args": [
         {
           "name": "winningNumber",
+          "type": "u64"
+        },
+        {
+          "name": "bonusLotteryPrize",
           "type": "u64"
         }
       ]

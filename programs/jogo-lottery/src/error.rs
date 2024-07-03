@@ -18,6 +18,8 @@ pub enum JoGoLotteryErrorCode {
     NoPrize,
     #[msg("Prize is insufficient")]
     InsufficientPrize,
+    #[msg("Max vote number exceed")]
+    MaxVoteNumberExceed,
 
     #[msg("Invalid admin role")]
     InvalidAdminRole,

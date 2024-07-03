@@ -10,7 +10,6 @@ async function main() {
     const admin = provider.wallet as anchor.Wallet
     const encoder = new TextEncoder();
     const poolId = Array.from(encoder.encode("euro2024".padEnd(32, '\0')));
-    const deadline = new Date().getTime() + 1000 * 60 * 60 * 24 * 365;
     const [lotteryPoolPDA, lotteryPoolBump] = anchor.web3.PublicKey.findProgramAddressSync(
         [
             Buffer.from("lottery_pool"),
@@ -29,7 +28,7 @@ async function main() {
         program.programId
     )
     console.log(`LotteryPoolVault: ${lotteryPoolVaultPDA.toBase58()}`)
-    const tx = await program.methods.initLotteryPool(poolId, new anchor.BN(4), new anchor.BN(deadline)).accounts({
+    const tx = await program.methods.initLotteryPool(poolId, new anchor.BN(4)).accounts({
         admin: admin.publicKey,
         vaultAccount: lotteryPoolVaultPDA,
         lotteryPool:lotteryPoolPDA,
