@@ -189,4 +189,26 @@ async function drawLottery(network: Network) {
     console.log("DrawLottery transaction signature", tx);
 }
 
+async function claimReward(network: Network) {
+    const provider = new anchor.AnchorProvider(connection, new anchor.Wallet(payer), {commitment: "confirmed"});
+    const programId = new PublicKey(programIds[network]);
+    const idlPath = path.resolve(__dirname, "../target/idl/jogo_lottery.json");
+    const idl = JSON.parse(fs.readFileSync(idlPath, "utf-8"));
+    const program = (new anchor.Program(idl, programId, provider)) as Program<JogoLottery>;
+    const lotteryPool = new PublicKey(lotteryPoolAccounts[network]);
+    const lotteryPoolVaultPDA = new PublicKey(lotteryPoolVaultAccounts[network]);
+    const [userLotteryPDA, bump] = PublicKey.findProgramAddressSync(
+        [Buffer.from('user_lottery'), lotteryPool.toBuffer(), payer.publicKey.toBuffer(), Buffer.from([1])],
+        programId
+    )
+    const tx = await program.methods.claimPrize().accounts({
+        owner: payer.publicKey,
+        lotteryPool: lotteryPool,
+        vaultAccount: lotteryPoolVaultPDA,
+	userLottery: userLotteryPDA,
+        systemProgram: anchor.web3.SystemProgram.programId,
+    }).signers([payer]).rpc();
+    console.log("ClaimReward transaction signature", tx);
+}
+
 getUserLotteries("solana-devnet")
