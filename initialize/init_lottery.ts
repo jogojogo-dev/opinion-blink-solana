@@ -28,13 +28,15 @@ async function main() {
         ],
         program.programId
     )
-    const tx = await program.methods.initLotteryPool(poolId, new anchor.BN(4), new anchor.BN(deadline)).accounts({
-        admin: admin.publicKey,
-        vaultAccount: lotteryPoolVaultPDA,
-        lotteryPool:lotteryPoolPDA,
-        systemProgram: anchor.web3.SystemProgram.programId,
-    }).signers([admin.payer]).rpc();
-    console.log("Initialize transaction signature", tx);
+    console.log("lotteryPoolPDA", lotteryPoolPDA.toBase58());
+    console.log("lotteryPoolVaultPDA", lotteryPoolVaultPDA.toBase58());
+    // const tx = await program.methods.initLotteryPool(poolId, new anchor.BN(4), new anchor.BN(deadline)).accounts({
+    //     admin: admin.publicKey,
+    //     vaultAccount: lotteryPoolVaultPDA,
+    //     lotteryPool:lotteryPoolPDA,
+    //     systemProgram: anchor.web3.SystemProgram.programId,
+    // }).signers([admin.payer]).rpc();
+    // console.log("Initialize transaction signature", tx);
 }
 
 main()
