@@ -13,8 +13,8 @@ url = "https://api.apr.dev"
 
 [provider]
 #cluster = "https://rpc.ankr.com/solana_devnet/77332afa1c3e75feb9ad53377c0ad164d9ad56436a06900fe758a41b4d72e58f"
-cluster = "devnet"
-wallet = ".keypairs/deployer.json"
+cluster = "mainnet"
+wallet = ".keypairs/mainnet-deployer.json"
 
 [scripts]
 init-jogo-vote = "ts-node initialize/init_vote.ts"
