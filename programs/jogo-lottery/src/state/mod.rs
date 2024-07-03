@@ -1,3 +1,3 @@
 mod lottery;
 
-pub use lottery::{LotteryPool, UserLottery};
+pub use lottery::{MAX_VOTE_NUMBERS, LotteryPool, UserLottery};

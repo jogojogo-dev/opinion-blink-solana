@@ -20,10 +20,9 @@ pub mod jogo_lottery {
     pub fn init_lottery_pool(
         ctx: Context<InitLotteryPool>,
         pool_id: [u8;32],
-        maximum_number: u64,
-        deadline: u64
+        maximum_number: u64
     ) -> Result<()> {
-        _init_lottery_pool(ctx, pool_id, maximum_number, deadline)
+        _init_lottery_pool(ctx, pool_id, maximum_number)
     }
 
     pub fn prepare_draw_lottery(
