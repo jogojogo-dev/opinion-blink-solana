@@ -1,14 +1,20 @@
 import {
+    Connection,
+    Keypair,
     PublicKey,
+    SystemProgram,
     TransactionInstruction,
     TransactionMessage,
-    VersionedTransaction,
-    SystemProgram, Keypair, Connection
+    VersionedTransaction
 } from '@solana/web3.js';
 import BN from "bn.js"
 import {sha256} from "crypto-hash";
+import path from "node:path";
+import fs from "node:fs";
+import * as anchor from "@coral-xyz/anchor";
+import {payer} from "./vote";
 
-const connection = new Connection("http://localhost:8899")
+const connection = new Connection("https://devnet.sonic.game")
 export type Network = 'solana-mainnet' | 'solana-devnet' | 'sonic-devnet' | 'localnet'
 
 const programIds: Record<Network, string> = {
@@ -44,7 +50,7 @@ async function buyLotteryTransaction(voter: PublicKey, voteNumber: number, netwo
     if (!programId || !lotteryPoolAccount) {
         throw new Error('Invalid network')
     }
-    const recentBlockhash = await connection.getLatestBlockhash({ commitment: 'max' })
+    const recentBlockhash = await connection.getLatestBlockhash({commitment: 'max'})
     const [userLotteryPDA, bump] = PublicKey.findProgramAddressSync(
         [Buffer.from('user_lottery'), lotteryPoolAccount.toBuffer(), voter.toBuffer(), Buffer.from([voteNumber])],
         programId
@@ -53,11 +59,11 @@ async function buyLotteryTransaction(voter: PublicKey, voteNumber: number, netwo
     const data = Buffer.concat([discriminator, Buffer.from(new Uint8Array(new BN(voteNumber).toArray('le', 8)))])
     const instruction = new TransactionInstruction({
         keys: [
-            { pubkey: voter, isSigner: true, isWritable: true },
-            { pubkey: lotteryPoolAccount, isSigner: false, isWritable: true },
-            { pubkey: lotteryPoolVaultAccount, isSigner: false, isWritable: true },
-            { pubkey: userLotteryPDA, isSigner: false, isWritable: true },
-            { pubkey: SystemProgram.programId, isSigner: false, isWritable: false },
+            {pubkey: voter, isSigner: true, isWritable: true},
+            {pubkey: lotteryPoolAccount, isSigner: false, isWritable: true},
+            {pubkey: lotteryPoolVaultAccount, isSigner: false, isWritable: true},
+            {pubkey: userLotteryPDA, isSigner: false, isWritable: true},
+            {pubkey: SystemProgram.programId, isSigner: false, isWritable: false},
         ],
         programId: programId,
         data: data,
@@ -70,7 +76,7 @@ async function buyLotteryTransaction(voter: PublicKey, voteNumber: number, netwo
     return new VersionedTransaction(messageV0)
 }
 
-async function main() {
+async function buyLottery() {
     const payerSecretKeyString = process.env.PAYER_SECRET_KEY;
     if (!payerSecretKeyString) {
         throw new Error("PAYER_SECRET_KEY not found in .env file");
@@ -98,4 +104,31 @@ async function main() {
     }
 }
 
-main()
+interface UserLottery {
+    owner: PublicKey,
+    lotteryPool: PublicKey,
+    balance: number,
+    voteNumber: number,
+    bump: number,
+    isClaimed: boolean
+}
+
+async function getUserLotteries(network: Network) {
+    const idlPath = path.resolve(__dirname, "../target/idl/jogo_lottery.json");
+    const idl = JSON.parse(fs.readFileSync(idlPath, "utf-8"));
+    const provider = new anchor.AnchorProvider(connection, new anchor.Wallet(payer), {commitment: "confirmed"});
+    const programId = new PublicKey(programIds[network]);
+
+    const program = new anchor.Program(idl, programId, provider);
+    const userLotteryAccounts = await program.account.userLottery.all() as anchor.ProgramAccount<UserLottery>[];
+    console.log("VoteAccounts: ", userLotteryAccounts.length);
+    userLotteryAccounts.map((userLottery) => {
+        const {owner, lotteryPool, balance, voteNumber, bump, isClaimed} = userLottery.account;
+
+        console.log({
+            owner: owner.toBase58(), lotteryPool: lotteryPool.toBase58(), balance, voteNumber, bump, isClaimed
+        });
+    })
+}
+
+getUserLotteries("sonic-devnet")
