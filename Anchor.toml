@@ -4,8 +4,8 @@
 seeds = false
 skip-lint = false
 
-[programs.devnet]
-jogo-lottery = "95ka3iyEnuyE44wqR9N1VEQxJbZ2zVcpVyxHqDGp1vn"
+[programs.mainnet]
+jogo-lottery = "B94DEe4DhVeJG1y5FXX76fmNa2xudgAPEF58p8HciyE4"
 jogo_vote = "Dh8AmCC1J8FUD6GnzJtc6hQhUhgndVbBbkKY6HyAa2nv"
 
 [registry]
