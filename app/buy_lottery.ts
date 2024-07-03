@@ -13,8 +13,9 @@ import path from "node:path";
 import fs from "node:fs";
 import * as anchor from "@coral-xyz/anchor";
 import {IDL, JogoLottery} from '../types/jogo_lottery'
+import {Program} from "@coral-xyz/anchor";
 
-const connection = new Connection("https://devnet.sonic.game")
+const connection = new Connection("https://api.devnet.solana.com")
 const payerSecretKeyString = process.env.PAYER_SECRET_KEY;
 if (!payerSecretKeyString) {
     throw new Error("PAYER_SECRET_KEY not found in .env file");
@@ -25,21 +26,21 @@ export type Network = 'solana-mainnet' | 'solana-devnet' | 'sonic-devnet' | 'loc
 
 const programIds: Record<Network, string> = {
     'solana-mainnet': '',
-    'solana-devnet': '',
+    'solana-devnet': '95ka3iyEnuyE44wqR9N1VEQxJbZ2zVcpVyxHqDGp1vn',
     'sonic-devnet': 'Yz73Shmf9b3YsqDzuqGhqBoqttU1njciYQryGgLPi6F',
     'localnet': 'CTMfMAsohXbSQa5TFTqFPpQdoQ88dUv77saWE1zXcrMq'
 }
 
 const lotteryPoolAccounts: Record<Network, string> = {
     'solana-mainnet': '',
-    'solana-devnet': '',
+    'solana-devnet': 'GfhVy4G4eG6CfEjaM4CKkXXTqyFvGJtQe8A69MPLTteM',
     'sonic-devnet': 'FijjaVJbTACD8qwZiBFRs4UprDitdp4E6f4GmWUcPPr2',
     'localnet': '56BDen4Kuay3n8ECSgsNz6sCYbPj9U4rQ6pSDo2sPHhF'
 }
 
 const lotteryPoolVaultAccounts: Record<Network, string> = {
     'solana-mainnet': '',
-    'solana-devnet': '',
+    'solana-devnet': '8JZ8i59K1baqCy7oWK587WkQmgUHrBioMJn4aqNp75y4',
     'sonic-devnet': '7frFP38CxTz1J8bRp6NbWwYwKGn8ZqfuJ5Mr8Xrymyoh',
     'localnet': 'Aks1SEHsE6Jzw213X9ENdtjN53Ey2fNYcySSmjq2odbK'
 }
@@ -171,4 +172,21 @@ async function checkUserHasVoteNumber(network: Network, userPubKey: PublicKey, v
     return true;
 }
 
-getUserLotteries("sonic-devnet")
+async function drawLottery(network: Network) {
+    const provider = new anchor.AnchorProvider(connection, new anchor.Wallet(payer), {commitment: "confirmed"});
+    const programId = new PublicKey(programIds[network]);
+    const idlPath = path.resolve(__dirname, "../target/idl/jogo_lottery.json");
+    const idl = JSON.parse(fs.readFileSync(idlPath, "utf-8"));
+    const program = (new anchor.Program(idl, programId, provider)) as Program<JogoLottery>;
+    const lotteryPool = new PublicKey(lotteryPoolAccounts[network]);
+    const lotteryPoolVaultPDA = new PublicKey(lotteryPoolVaultAccounts[network]);
+    const tx = await program.methods.prepareDrawLottery(new anchor.BN(1), new anchor.BN(10_000_000_000)).accounts({
+        admin: payer.publicKey,
+        lotteryPool: lotteryPool,
+        vaultAccount: lotteryPoolVaultPDA,
+        systemProgram: anchor.web3.SystemProgram.programId,
+    }).signers([payer]).rpc();
+    console.log("DrawLottery transaction signature", tx);
+}
+
+getUserLotteries("solana-devnet")
