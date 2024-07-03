@@ -12,9 +12,14 @@ import {sha256} from "crypto-hash";
 import path from "node:path";
 import fs from "node:fs";
 import * as anchor from "@coral-xyz/anchor";
-import {payer} from "./vote";
 
 const connection = new Connection("https://devnet.sonic.game")
+const payerSecretKeyString = process.env.PAYER_SECRET_KEY;
+if (!payerSecretKeyString) {
+    throw new Error("PAYER_SECRET_KEY not found in .env file");
+}
+const payerSecretKey = new Uint8Array(JSON.parse(payerSecretKeyString));
+const payer = Keypair.fromSecretKey(payerSecretKey);
 export type Network = 'solana-mainnet' | 'solana-devnet' | 'sonic-devnet' | 'localnet'
 
 const programIds: Record<Network, string> = {
@@ -107,7 +112,7 @@ async function buyLottery() {
 interface UserLottery {
     owner: PublicKey,
     lotteryPool: PublicKey,
-    balance: number,
+    balance: BigInt,
     voteNumber: number,
     bump: number,
     isClaimed: boolean
@@ -121,14 +126,50 @@ async function getUserLotteries(network: Network) {
 
     const program = new anchor.Program(idl, programId, provider);
     const userLotteryAccounts = await program.account.userLottery.all() as anchor.ProgramAccount<UserLottery>[];
-    console.log("VoteAccounts: ", userLotteryAccounts.length);
+    console.log("UserLotteryAccounts: ", userLotteryAccounts.length);
     userLotteryAccounts.map((userLottery) => {
         const {owner, lotteryPool, balance, voteNumber, bump, isClaimed} = userLottery.account;
 
         console.log({
-            owner: owner.toBase58(), lotteryPool: lotteryPool.toBase58(), balance, voteNumber, bump, isClaimed
+            owner: owner.toBase58(),
+            lotteryPool: lotteryPool.toBase58(),
+            balance: balance.toString(),
+            voteNumber: voteNumber.toString(),
+            bump,
+            isClaimed
         });
     })
+    return userLotteryAccounts
+}
+
+async function getTotalUserAtVoteNumber(network: Network, voteNumber: number) {
+    const userLotteries = await getUserLotteries(network);
+    return userLotteries.filter((userLottery) => userLottery.account.voteNumber === voteNumber).length
+}
+
+async function checkUserHasVoteNumber(network: Network, userPubKey: PublicKey, voteNumber: number) {
+    const lotteryPool = new PublicKey(lotteryPoolAccounts[network]);
+    const programId = new PublicKey(programIds[network]);
+    const idlPath = path.resolve(__dirname, "../target/idl/jogo_lottery.json");
+    const idl = JSON.parse(fs.readFileSync(idlPath, "utf-8"));
+    const provider = new anchor.AnchorProvider(connection, new anchor.Wallet(payer), {commitment: "confirmed"});
+
+    const program = new anchor.Program(idl, programId, provider);
+    try {
+        const [userLotteryPDA, userLotteryBump] = anchor.web3.PublicKey.findProgramAddressSync(
+            [
+                Buffer.from("user_lottery"),
+                lotteryPool.toBuffer(),
+                userPubKey.toBuffer(),
+                Buffer.from([voteNumber])
+            ],
+            programId
+        );
+        await program.account.userLottery.fetch(userLotteryPDA);
+    } catch (e) {
+        return false;
+    }
+    return true;
 }
 
 getUserLotteries("sonic-devnet")
