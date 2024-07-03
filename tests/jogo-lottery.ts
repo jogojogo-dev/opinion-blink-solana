@@ -10,7 +10,6 @@ describe("jogo-lottery", () => {
     const users = Array.from({length: 10}, () => anchor.web3.Keypair.generate());
     const encoder = new TextEncoder();
     const poolId = Array.from(encoder.encode("euro2024".padEnd(32, '\0')));
-    const deadline = Date.now() + 1000;
     const [lotteryPoolPDA, lotteryPoolBump] = anchor.web3.PublicKey.findProgramAddressSync(
         [
             Buffer.from("lottery_pool"),
@@ -150,4 +149,39 @@ describe("jogo-lottery", () => {
         let vaultBalanceAfter = await program.provider.connection.getBalance(lotteryPoolVaultPDA);
         assert.isBelow(vaultBalanceAfter, vaultBalanceBefore, "Balance after should be below balance before");
     })
+
+    it("Check all user status", async () => {
+        for (let i = 0; i < 10; i++) {
+            try {
+                const [userLotteryPDA, userLotteryBump] = anchor.web3.PublicKey.findProgramAddressSync(
+                    [
+                        Buffer.from("user_lottery"),
+                        lotteryPoolPDA.toBuffer(),
+                        users[i].publicKey.toBuffer(),
+                        Buffer.from([randomWinningNumber])
+                    ],
+                    program.programId
+                );
+                const userLotteryData = await program.account.userLottery.fetch(userLotteryPDA);
+                console.log({
+                    owner: userLotteryData.owner.toBase58(),
+                    balance: userLotteryData.balance.toNumber(),
+                    claimedPrize: userLotteryData.claimedPrize.toNumber(),
+                })
+            } catch (e) {
+                continue
+            }
+        }
+    })
+
+    it("Close LotteryPool Vault", async() => {
+        let lotteryPoolData = await program.account.lotteryPool.fetch(lotteryPoolPDA)
+        const tx = await program.methods.closeLotteryPool().accounts({
+            admin: admin.publicKey,
+            vaultAccount: lotteryPoolVaultPDA,
+            lotteryPool:lotteryPoolPDA,
+            systemProgram: anchor.web3.SystemProgram.programId,
+        }).signers([admin]).rpc();
+        console.log("Close lottery transaction signature", tx);
+    });
 });

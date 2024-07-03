@@ -56,6 +56,17 @@ pub struct ClaimPrize<'info> {
     system_program: Program<'info, System>,
 }
 
+#[derive(Accounts)]
+pub struct CloseLotteryPool<'info> {
+    #[account(mut)]
+    pub admin: Signer<'info>,
+    #[account(mut, has_one = admin, constraint = lottery_pool.is_drawn @ JoGoLotteryErrorCode::PoolNotClosed)]
+    pub lottery_pool: Account<'info, LotteryPool>,
+    #[account(mut)]
+    pub vault_account: SystemAccount<'info>,
+    system_program: Program<'info, System>,
+}
+
 #[event]
 pub struct EnterLotteryPoolEvent {
     #[index]
@@ -99,9 +110,9 @@ pub(crate) fn _enter_lottery_pool(
     // transfer entry lottery fee
     transfer(cpi_ctx, ENTRY_LOTTERY_FEE)?;
 
+    lottery_pool.prize += ENTRY_LOTTERY_FEE;
     lottery_pool.votes_prize[vote_number as usize] += ENTRY_LOTTERY_FEE;
     user_lottery.balance += ENTRY_LOTTERY_FEE;
-    lottery_pool.prize += ENTRY_LOTTERY_FEE;
     emit!(EnterLotteryPoolEvent {
         pool_id: lottery_pool.pool_id,
         lottery_pool: lottery_pool.key(),
@@ -170,6 +181,7 @@ pub(crate) fn _claim_prize(ctx: Context<ClaimPrize>) -> Result<()> {
     require!(prize + lottery_pool.claimed_prize <= lottery_pool.bonus_prize + lottery_pool.prize, JoGoLotteryErrorCode::InsufficientPrize);
 
     lottery_pool.claimed_prize += prize;
+    lottery_pool.claimed_count += 1;
     user_lottery.claimed_prize = prize;
 
     let admin_key = lottery_pool.admin.key();
@@ -191,5 +203,30 @@ pub(crate) fn _claim_prize(ctx: Context<ClaimPrize>) -> Result<()> {
         user: ctx.accounts.owner.key(),
         prize
     });
+    Ok(())
+}
+
+pub(crate) fn _close_lottery_pool(ctx: Context<CloseLotteryPool>) -> Result<()> {
+    let lottery_pool = &mut ctx.accounts.lottery_pool;
+    require!(lottery_pool.is_drawn, JoGoLotteryErrorCode::PoolNotClosed);
+    let expected_count = lottery_pool.votes_prize[lottery_pool.winning_number as usize] / ENTRY_LOTTERY_FEE;
+    require!(lottery_pool.claimed_count == expected_count, JoGoLotteryErrorCode::LotteryPoolCanNotClose);
+
+    let remaining = ctx.accounts.vault_account.lamports();
+    if remaining > 0 {
+        let admin_key = lottery_pool.admin.key();
+        let lottery_pool_key = lottery_pool.key();
+        let seeds = &[b"lottery_pool_sol", admin_key.as_ref(), lottery_pool_key.as_ref(), &[lottery_pool.vault_bump]];
+        let signed_seeds = [&seeds[..]];
+        let cpi_ctx = CpiContext::new_with_signer(
+            ctx.accounts.system_program.to_account_info(),
+            Transfer {
+                from: ctx.accounts.vault_account.to_account_info(),
+                to: ctx.accounts.admin.to_account_info(),
+            },
+            &signed_seeds
+        );
+        transfer(cpi_ctx, remaining)?;
+    }
     Ok(())
 }

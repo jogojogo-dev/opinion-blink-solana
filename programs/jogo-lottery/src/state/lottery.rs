@@ -17,6 +17,7 @@ pub struct LotteryPool {
     pub vault_bump: u8,
     pub pool_id: [u8;32],
     pub votes_prize: [u64; MAX_VOTE_NUMBERS],
+    pub claimed_count: u64,
 }
 
 impl LotteryPool {
