@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 use crate::error::JoGoLotteryErrorCode;
 
-pub const MAX_VOTE_NUMBERS: usize = 32;
+pub const MAX_VOTE_NUMBERS: usize = 8;
 
 #[account]
 pub struct LotteryPool {
