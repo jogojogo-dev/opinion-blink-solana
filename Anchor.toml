@@ -12,7 +12,7 @@ jogo_vote = "Dh8AmCC1J8FUD6GnzJtc6hQhUhgndVbBbkKY6HyAa2nv"
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "https://devnet.sonic.game"
+cluster = "https://rpc.ankr.com/solana_devnet/77332afa1c3e75feb9ad53377c0ad164d9ad56436a06900fe758a41b4d72e58f"
 wallet = ".keypairs/deployer.json"
 
 [scripts]
