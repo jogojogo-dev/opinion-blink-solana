@@ -5,14 +5,15 @@ seeds = false
 skip-lint = false
 
 [programs.devnet]
-jogo-lottery = "Yz73Shmf9b3YsqDzuqGhqBoqttU1njciYQryGgLPi6F"
+jogo-lottery = "95ka3iyEnuyE44wqR9N1VEQxJbZ2zVcpVyxHqDGp1vn"
 jogo_vote = "Dh8AmCC1J8FUD6GnzJtc6hQhUhgndVbBbkKY6HyAa2nv"
 
 [registry]
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "https://rpc.ankr.com/solana_devnet/77332afa1c3e75feb9ad53377c0ad164d9ad56436a06900fe758a41b4d72e58f"
+#cluster = "https://rpc.ankr.com/solana_devnet/77332afa1c3e75feb9ad53377c0ad164d9ad56436a06900fe758a41b4d72e58f"
+cluster = "devnet"
 wallet = ".keypairs/deployer.json"
 
 [scripts]
