@@ -11,7 +11,7 @@ pub use constants::*;
 pub use instructions::*;
 pub use state::*;
 
-declare_id!("65iTa1pT1Yv34uqjakYKAHkyywqDqex2Dvv6HJo5YRF6");
+declare_id!("Yz73Shmf9b3YsqDzuqGhqBoqttU1njciYQryGgLPi6F");
 
 #[program]
 pub mod jogo_lottery {

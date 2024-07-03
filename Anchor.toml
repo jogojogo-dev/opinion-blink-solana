@@ -5,7 +5,7 @@ seeds = false
 skip-lint = false
 
 [programs.devnet]
-jogo-lottery = "CTMfMAsohXbSQa5TFTqFPpQdoQ88dUv77saWE1zXcrMq"
+jogo-lottery = "Yz73Shmf9b3YsqDzuqGhqBoqttU1njciYQryGgLPi6F"
 jogo_vote = "Dh8AmCC1J8FUD6GnzJtc6hQhUhgndVbBbkKY6HyAa2nv"
 
 [registry]
