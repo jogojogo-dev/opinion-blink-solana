@@ -37,4 +37,8 @@ pub enum JoGoLotteryErrorCode {
     InvalidTimestamp,
     #[msg("Invalid winning number")]
     InvalidWinningNumber,
+    #[msg("Invalid buy lottery numbers")]
+    InvalidBuyLotteryNumbers,
+    #[msg("Invalid lottery fee")]
+    InvalidLotteryFee
 }

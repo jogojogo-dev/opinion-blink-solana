@@ -1,7 +1,6 @@
 use anchor_lang::prelude::*;
 use crate::error::JoGoLotteryErrorCode;
-
-pub const MAX_VOTE_NUMBERS: usize = 8;
+use crate::MAX_VOTE_NUMBERS;
 
 #[account]
 pub struct LotteryPool {
@@ -18,13 +17,17 @@ pub struct LotteryPool {
     pub pool_id: [u8;32],
     pub votes_prize: [u64; MAX_VOTE_NUMBERS],
     pub claimed_count: u64,
+    pub entry_lottery_price: u64,
+    pub lottery_fee: u64, // base on 1000, 309 = 30.9%
 }
 
 impl LotteryPool {
+    pub const SIZE: usize = 8 + std::mem::size_of::<Self>();
+
     pub fn calculate_prize(&self, user_prize: u64) -> u64 {
         let vote_prize = self.votes_prize[(self.winning_number) as usize];
         assert_ne!(vote_prize, 0, "Insufficient vote prize");
-        (self.prize + self.bonus_prize) * user_prize / vote_prize
+        (((self.prize + self.bonus_prize) as u128) * (user_prize as u128) / (vote_prize as u128)) as u64
     }
 }
 
@@ -37,4 +40,8 @@ pub struct UserLottery {
     pub claimed_prize: u64,
     pub bump: u8,
     pub is_claimed: bool,
+}
+
+impl UserLottery {
+    pub const SIZE: usize = 8 + std::mem::size_of::<Self>();
 }
