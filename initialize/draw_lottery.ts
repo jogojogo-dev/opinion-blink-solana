@@ -27,13 +27,13 @@ async function main() {
         program.programId
     )
     console.log(`LotteryPoolVault: ${lotteryPoolVaultPDA.toBase58()}`)
-    const tx = await program.methods.initLotteryPool(poolId, new anchor.BN(4)).accounts({
+    const tx = await program.methods.prepareDrawLottery(new anchor.BN(2), new anchor.BN(67_000_000_000)).accounts({
         admin: admin.publicKey,
         vaultAccount: lotteryPoolVaultPDA,
         lotteryPool:lotteryPoolPDA,
         systemProgram: anchor.web3.SystemProgram.programId,
     }).signers([admin.payer]).rpc();
-    console.log("Initialize transaction signature", tx);
+    console.log("Draw lottery transaction signature", tx);
 }
 
 main()
