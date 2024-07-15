@@ -270,6 +270,11 @@ describe("jogo-lottery", () => {
     }
   });
 
+  it("Check lotteryPool votesPrize", async() => {
+    let lotteryPoolData = await program.account.lotteryPool.fetch(lotteryPoolPDA);
+    console.log("VotesPrize: ", lotteryPoolData.votesPrize);
+  })
+
   it("Close LotteryPool Vault", async () => {
     let vaultBalanceBefore = await program.provider.connection.getBalance(
       lotteryPoolVaultPDA
