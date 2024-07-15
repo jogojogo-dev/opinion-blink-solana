@@ -107,12 +107,15 @@ pub(crate) fn _enter_lottery_pool(
             to: ctx.accounts.vault_account.to_account_info(),
         },
     );
-    // transfer entry lottery fee
-    transfer(cpi_ctx, ENTRY_LOTTERY_FEE)?;
 
-    lottery_pool.prize += ENTRY_LOTTERY_FEE;
-    lottery_pool.votes_prize[vote_number as usize] += ENTRY_LOTTERY_FEE;
-    user_lottery.balance += ENTRY_LOTTERY_FEE;
+    let total_cost: u64 = 7_500_000;
+
+    // transfer entry lottery fee
+    transfer(cpi_ctx, total_cost)?;
+
+    lottery_pool.prize += total_cost;
+    lottery_pool.votes_prize[vote_number as usize] += total_cost;
+    user_lottery.balance += total_cost;
     emit!(EnterLotteryPoolEvent {
         pool_id: lottery_pool.pool_id,
         lottery_pool: lottery_pool.key(),
@@ -209,8 +212,6 @@ pub(crate) fn _claim_prize(ctx: Context<ClaimPrize>) -> Result<()> {
 pub(crate) fn _close_lottery_pool(ctx: Context<CloseLotteryPool>) -> Result<()> {
     let lottery_pool = &mut ctx.accounts.lottery_pool;
     require!(lottery_pool.is_drawn, JoGoLotteryErrorCode::PoolNotClosed);
-    let expected_count = lottery_pool.votes_prize[lottery_pool.winning_number as usize] / ENTRY_LOTTERY_FEE;
-    require!(lottery_pool.claimed_count == expected_count, JoGoLotteryErrorCode::LotteryPoolCanNotClose);
 
     let remaining = ctx.accounts.vault_account.lamports();
     if remaining > 0 {
