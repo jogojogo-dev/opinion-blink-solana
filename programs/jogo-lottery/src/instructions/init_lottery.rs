@@ -30,9 +30,6 @@ pub struct InitLotteryPool<'info> {
         associated_token::authority = lottery_pool,
     )]
     pub vault_token_account: Box<Account<'info, TokenAccount>>,
-    #[account(
-        constraint = key == mint_account.key(),
-    )]
     pub mint_account: Account<'info, Mint>,
     pub token_program: Program<'info, Token>,
     pub system_program: Program<'info, System>,

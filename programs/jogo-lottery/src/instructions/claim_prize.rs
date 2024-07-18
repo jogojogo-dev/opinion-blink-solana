@@ -4,11 +4,11 @@ use anchor_spl::token::{Token, TokenAccount};
 use crate::error::JoGoLotteryErrorCode;
 use crate::instructions::utils::transfer_spl;
 use crate::state::{LotteryPool, UserLottery};
-use crate::{LOTTERY_POOL, USER_LOTTERY};
+use crate::{generate_seeds, LOTTERY_POOL, USER_LOTTERY};
 
 #[derive(Accounts)]
 pub struct ClaimPrize<'info> {
-    /// This is only used to show admin pubkey, safe to use unchecked_account
+    /// CHECK: This is only used to show admin pubkey, safe to use unchecked_account
     pub admin: UncheckedAccount<'info>,
     #[account(mut, has_one = owner)]
     pub user_lottery: Account<'info, UserLottery>,
@@ -39,6 +39,7 @@ pub struct ClaimPrizeEntry {}
 
 impl ClaimPrizeEntry {
     pub(crate) fn claim_prize(ctx: Context<ClaimPrize>, is_no_prize: bool) -> Result<()> {
+        let lottery_pool_account_info = ctx.accounts.lottery_pool.to_account_info();
         let user_lottery = &mut ctx.accounts.user_lottery;
         let lottery_pool = &mut ctx.accounts.lottery_pool;
         require!(
@@ -67,17 +68,14 @@ impl ClaimPrizeEntry {
             let actual_prize = prize - lottery_pool.lottery_fee * prize / 1000;
             lottery_pool.claimed_prize += prize;
             user_lottery.claimed_prize = prize; // store the claimed prize with fee
-            let seeds = &[
-                LOTTERY_POOL,
-                ctx.accounts.admin.clone().key().as_ref(),
-                lottery_pool.pool_id.clone().as_ref(),
-                &[lottery_pool.bump],
-            ];
+
+            let admin_key = lottery_pool.admin.key();
+            let seeds = generate_seeds!(lottery_pool, admin_key);
             transfer_spl(
-                &ctx.accounts.vault_token_account.to_account_info(),
-                &ctx.accounts.user_token_account.to_account_info(),
-                &ctx.accounts.lottery_pool.to_account_info(),
-                &ctx.accounts.token_program.to_account_info(),
+                ctx.accounts.vault_token_account.to_account_info(),
+                ctx.accounts.user_token_account.to_account_info(),
+                lottery_pool_account_info,
+                ctx.accounts.token_program.to_account_info(),
                 actual_prize,
                 false,
                 seeds,

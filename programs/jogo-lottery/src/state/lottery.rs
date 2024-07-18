@@ -1,5 +1,5 @@
 use crate::error::JoGoLotteryErrorCode;
-use crate::MAX_VOTE_NUMBERS;
+use crate::{LOTTERY_POOL, MAX_VOTE_NUMBERS};
 use anchor_lang::prelude::*;
 use std::char::MAX;
 

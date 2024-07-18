@@ -6,7 +6,7 @@ use std::str::FromStr;
 use crate::error::JoGoLotteryErrorCode;
 use crate::instructions::utils::{transfer_sol, transfer_spl, wrap_sol};
 use crate::state::{LotteryPool, UserLottery};
-use crate::{LOTTERY_POOL, USER_LOTTERY, WRAPPED_SOL};
+use crate::{generate_seeds, LOTTERY_POOL, USER_LOTTERY, WRAPPED_SOL};
 
 #[derive(Accounts)]
 #[instruction(vote_number: u64)]
@@ -57,6 +57,7 @@ impl EnterLotteryPoolEntry {
         buy_lottery_numbers: u64,
         use_sol: bool,
     ) -> Result<()> {
+        let lottery_pool_account_info = ctx.accounts.lottery_pool.to_account_info();
         let user_lottery = &mut ctx.accounts.user_lottery;
         let lottery_pool = &mut ctx.accounts.lottery_pool;
         require!(
@@ -101,31 +102,27 @@ impl EnterLotteryPoolEntry {
             );
             // wrap sol to wrapped sol and transfer to vault_token_account
             transfer_sol(
-                &ctx.accounts.user.to_account_info(),
-                &ctx.accounts.vault_token_account.to_account_info(),
-                &ctx.accounts.system_program.to_account_info(),
+                ctx.accounts.user.to_account_info(),
+                ctx.accounts.vault_token_account.to_account_info(),
+                ctx.accounts.system_program.to_account_info(),
                 total_cost,
                 true,
                 &[],
             )?;
-            let seeds = &[
-                LOTTERY_POOL,
-                lottery_pool.admin.clone().key().as_ref(),
-                lottery_pool.pool_id.clone().as_ref(),
-                &[lottery_pool.bump],
-            ];
+            let admin_key = lottery_pool.admin.key();
+            let seeds = generate_seeds!(lottery_pool, admin_key);
             wrap_sol(
-                &ctx.accounts.vault_token_account.to_account_info(),
-                &ctx.accounts.token_program.to_account_info(),
+                ctx.accounts.vault_token_account.to_account_info(),
+                ctx.accounts.token_program.to_account_info(),
                 seeds,
             )?;
         } else {
             // transfer spl token to vault_token_account
             transfer_spl(
-                &ctx.accounts.user_token_account.to_account_info(),
-                &ctx.accounts.vault_token_account.to_account_info(),
-                &ctx.accounts.system_program.to_account_info(),
-                &ctx.accounts.lottery_pool.to_account_info(),
+                ctx.accounts.user_token_account.to_account_info(),
+                ctx.accounts.vault_token_account.to_account_info(),
+                ctx.accounts.system_program.to_account_info(),
+                lottery_pool_account_info,
                 total_cost,
                 true,
                 &[],

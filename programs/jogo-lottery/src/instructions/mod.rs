@@ -3,7 +3,8 @@ pub mod claim_prize;
 pub mod close_lottery;
 pub mod draw_lottery;
 pub mod init_lottery;
-mod utils;
+#[macro_use]
+pub mod utils;
 
 pub use buy_lottery::*;
 pub use claim_prize::*;
