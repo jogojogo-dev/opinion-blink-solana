@@ -1,10 +1,7 @@
 use anchor_lang::prelude::*;
 
 #[constant]
-pub const WSOL: &str = "So11111111111111111111111111111111111111112";
-
-#[constant]
-pub const SEED: &str = "anchor";
+pub const WRAPPED_SOL: &str = "So11111111111111111111111111111111111111112";
 
 #[constant]
 pub const MAX_VOTE_NUMBERS: usize = 16;
@@ -14,6 +11,3 @@ pub const USER_LOTTERY: &[u8] = b"user_lottery";
 
 #[constant]
 pub const LOTTERY_POOL: &[u8] = b"lottery_pool";
-
-#[constant]
-pub const LOTTERY_POOL_SOL: &[u8] = b"lottery_pool_sol";

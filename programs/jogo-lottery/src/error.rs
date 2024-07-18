@@ -44,5 +44,5 @@ pub enum JoGoLotteryErrorCode {
     #[msg("Invalid lottery fee")]
     InvalidLotteryFee,
     #[msg("Invalid mint account")]
-    InvalidMint,
+    InvalidMintAccount,
 }
