@@ -24,7 +24,7 @@ impl LotteryPool {
     pub fn calculate_prize(&self, user_prize: u64) -> u64 {
         let vote_prize = self.votes_prize[(self.winning_number) as usize];
         assert_ne!(vote_prize, 0, "Insufficient vote prize");
-        (self.prize + self.bonus_prize) * user_prize / vote_prize
+         (((self.prize + self.bonus_prize) as u128) * (user_prize as u128) / (vote_prize as u128)) as u64
     }
 }
 
