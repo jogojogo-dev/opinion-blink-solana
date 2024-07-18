@@ -6,7 +6,7 @@ import {
   getOrCreateAssociatedTokenAccount,
   mintTo,
 } from "@solana/spl-token";
-import {assert} from "chai";
+import { assert } from "chai";
 
 describe("mintToken", () => {
   // Anchor provider
@@ -37,14 +37,13 @@ describe("mintToken", () => {
       "confirmed"
     );
 
-
     // Create the mint
     mint = await createMint(
       provider.connection,
       user,
       mintAuthority.publicKey,
       null,
-      9, // Decimals
+      9 // Decimals
     );
 
     // Get or create associated token account for the user
@@ -65,7 +64,12 @@ describe("mintToken", () => {
       10_000_000_000
     );
 
-    const tokenAccountInfo = await provider.connection.getTokenAccountBalance(userTokenAccount.address);
-    assert.equal(tokenAccountInfo.value.amount, (new anchor.BN(10_000_000_000)).toString());
+    const tokenAccountInfo = await provider.connection.getTokenAccountBalance(
+      userTokenAccount.address
+    );
+    assert.equal(
+      tokenAccountInfo.value.amount,
+      new anchor.BN(10_000_000_000).toString()
+    );
   });
 });

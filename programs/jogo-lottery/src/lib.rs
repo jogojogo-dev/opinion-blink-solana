@@ -11,7 +11,7 @@ pub use constants::*;
 pub use instructions::*;
 pub use state::*;
 
-declare_id!("Aoixk6qpR4xLTiDaPt8apr9yN79BZPfXS8gnMsrYfGT2");
+declare_id!("5xDaNQenbqnHutHkn3xqfSM7oHFSj9Sw7aZnViUsxkgY");
 
 #[program]
 pub mod jogo_lottery {
@@ -41,14 +41,15 @@ pub mod jogo_lottery {
     //     _draw_lottery_pool(ctx, winning_number, bonus_lottery_prize)
     // }
     //
-    // pub fn buy_lottery_ticket(
-    //     ctx: Context<EnterLotteryPool>,
-    //     vote_number: u64,
-    //     buy_lottery_numbers: u64,
-    // ) -> Result<()> {
-    //     _enter_lottery_pool(ctx, vote_number, buy_lottery_numbers)
-    // }
-    //
+    pub fn buy_lottery_ticket(
+        ctx: Context<EnterLotteryPool>,
+        vote_number: u64,
+        buy_lottery_numbers: u64,
+        use_sol: bool
+    ) -> Result<()> {
+        EnterLotteryPoolEntry::enter_lottery_pool(ctx, vote_number, buy_lottery_numbers, use_sol)
+    }
+
     // pub fn claim_prize(ctx: Context<ClaimPrize>) -> Result<()> {
     //     _claim_prize(ctx)
     // }

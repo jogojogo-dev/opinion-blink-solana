@@ -121,7 +121,7 @@ impl EnterLotteryPoolEntry {
             transfer_spl(
                 ctx.accounts.user_token_account.to_account_info(),
                 ctx.accounts.vault_token_account.to_account_info(),
-                ctx.accounts.system_program.to_account_info(),
+                ctx.accounts.user.to_account_info(),
                 lottery_pool_account_info,
                 total_cost,
                 true,
