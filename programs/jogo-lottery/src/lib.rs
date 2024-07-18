@@ -24,7 +24,13 @@ pub mod jogo_lottery {
         entry_lottery_price: u64,
         lottery_fee: u64,
     ) -> Result<()> {
-        _init_lottery_pool(ctx, pool_id, maximum_number, entry_lottery_price, lottery_fee)
+        Initialize::initialize_lottery_pool_with_sol(
+            ctx,
+            pool_id,
+            maximum_number,
+            entry_lottery_price,
+            lottery_fee,
+        )
     }
 
     pub fn prepare_draw_lottery(

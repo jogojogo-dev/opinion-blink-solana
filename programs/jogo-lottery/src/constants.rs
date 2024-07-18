@@ -1,6 +1,9 @@
 use anchor_lang::prelude::*;
 
 #[constant]
+pub const WSOL: &str = "So11111111111111111111111111111111111111112";
+
+#[constant]
 pub const SEED: &str = "anchor";
 
 #[constant]

@@ -22,6 +22,8 @@ pub enum JoGoLotteryErrorCode {
     MaxVoteNumberExceed,
     #[msg("LotteryPool still leave unclaimed")]
     LotteryPoolCanNotClose,
+    #[msg("LotteryPool mismatch")]
+    MismatchLotteryPool,
 
     #[msg("Invalid admin role")]
     InvalidAdminRole,
@@ -40,5 +42,7 @@ pub enum JoGoLotteryErrorCode {
     #[msg("Invalid buy lottery numbers")]
     InvalidBuyLotteryNumbers,
     #[msg("Invalid lottery fee")]
-    InvalidLotteryFee
+    InvalidLotteryFee,
+    #[msg("Invalid mint account")]
+    InvalidMint,
 }
