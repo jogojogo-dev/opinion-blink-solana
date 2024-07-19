@@ -45,7 +45,7 @@ pub mod jogo_lottery {
         ctx: Context<EnterLotteryPool>,
         vote_number: u64,
         buy_lottery_numbers: u64,
-        use_sol: bool
+        use_sol: bool,
     ) -> Result<()> {
         EnterLotteryPoolEntry::enter_lottery_pool(ctx, vote_number, buy_lottery_numbers, use_sol)
     }

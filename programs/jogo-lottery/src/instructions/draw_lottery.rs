@@ -40,9 +40,6 @@ pub struct DrawLotteryPoolEvent {
 pub struct DrawLotteryPoolEntry {}
 
 impl DrawLotteryPoolEntry {
-    fn calculate_prize_fee(lottery_pool: &Account<LotteryPool>) -> u64 {
-        lottery_pool.lottery_fee * (lottery_pool.prize + lottery_pool.bonus_prize) / 1000
-    }
 
     pub(crate) fn draw_lottery_sol_pool(
         ctx: Context<DrawLotteryPool>,
@@ -94,7 +91,7 @@ impl DrawLotteryPoolEntry {
         }
 
         // Vault transfer fee to recipient as wrapped sol
-        let fee = Self::calculate_prize_fee(lottery_pool);
+        let fee = lottery_pool.calculate_prize_fee();
         if fee > 0 {
             let admin_key = lottery_pool.admin.key();
             let seeds = generate_seeds!(lottery_pool, admin_key);

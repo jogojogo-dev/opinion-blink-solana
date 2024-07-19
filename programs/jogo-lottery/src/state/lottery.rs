@@ -31,6 +31,10 @@ impl LotteryPool {
         (((self.prize + self.bonus_prize) as u128) * (user_prize as u128) / (vote_prize as u128))
             as u64
     }
+
+    pub fn calculate_prize_fee(&self) -> u64 {
+        ((self.lottery_fee as u128) * ((self.prize + self.bonus_prize) as u128) / 1000u128) as u64
+    }
 }
 
 #[account]

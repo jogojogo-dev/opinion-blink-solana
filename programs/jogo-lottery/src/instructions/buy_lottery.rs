@@ -91,47 +91,49 @@ impl EnterLotteryPoolEntry {
 
         let total_cost = lottery_pool.entry_lottery_price * buy_lottery_numbers;
 
-        if use_sol {
-            require!(
+        if total_cost > 0 {
+            if use_sol {
+                require!(
                 ctx.accounts.vault_token_account.mint == Pubkey::from_str(WRAPPED_SOL).unwrap(),
                 JoGoLotteryErrorCode::InvalidMintAccount
             );
-            require!(
+                require!(
                 ctx.accounts.vault_token_account.mint == ctx.accounts.user_token_account.mint,
                 JoGoLotteryErrorCode::InvalidMintAccount
             );
-            // wrap sol to wrapped sol and transfer to vault_token_account
-            transfer_sol(
-                ctx.accounts.user.to_account_info(),
-                ctx.accounts.vault_token_account.to_account_info(),
-                ctx.accounts.system_program.to_account_info(),
-                total_cost,
-                true,
-                &[],
-            )?;
-            let admin_key = lottery_pool.admin.key();
-            let seeds = generate_seeds!(lottery_pool, admin_key);
-            wrap_sol(
-                ctx.accounts.vault_token_account.to_account_info(),
-                ctx.accounts.token_program.to_account_info(),
-                seeds,
-            )?;
-        } else {
-            // transfer spl token to vault_token_account
-            transfer_spl(
-                ctx.accounts.user_token_account.to_account_info(),
-                ctx.accounts.vault_token_account.to_account_info(),
-                ctx.accounts.user.to_account_info(),
-                lottery_pool_account_info,
-                total_cost,
-                true,
-                &[],
-            )?;
-        }
+                // wrap sol to wrapped sol and transfer to vault_token_account
+                transfer_sol(
+                    ctx.accounts.user.to_account_info(),
+                    ctx.accounts.vault_token_account.to_account_info(),
+                    ctx.accounts.system_program.to_account_info(),
+                    total_cost,
+                    true,
+                    &[],
+                )?;
+                let admin_key = lottery_pool.admin.key();
+                let seeds = generate_seeds!(lottery_pool, admin_key);
+                wrap_sol(
+                    ctx.accounts.vault_token_account.to_account_info(),
+                    ctx.accounts.token_program.to_account_info(),
+                    seeds,
+                )?;
+            } else {
+                // transfer spl token to vault_token_account
+                transfer_spl(
+                    ctx.accounts.user_token_account.to_account_info(),
+                    ctx.accounts.vault_token_account.to_account_info(),
+                    ctx.accounts.user.to_account_info(),
+                    lottery_pool_account_info,
+                    total_cost,
+                    true,
+                    &[],
+                )?;
+            }
 
-        lottery_pool.prize += total_cost;
-        lottery_pool.votes_prize[vote_number as usize] += total_cost;
-        user_lottery.balance += total_cost;
+            lottery_pool.prize += total_cost;
+            lottery_pool.votes_prize[vote_number as usize] += total_cost;
+            user_lottery.balance += total_cost;
+        }
 
         emit!(EnterLotteryPoolEvent {
             pool_id: lottery_pool.pool_id,

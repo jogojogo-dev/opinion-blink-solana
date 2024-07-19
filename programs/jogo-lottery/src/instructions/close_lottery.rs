@@ -3,10 +3,10 @@ use std::str::FromStr;
 use anchor_lang::prelude::*;
 use anchor_spl::token::{Token, TokenAccount};
 
-use crate::{generate_seeds, LOTTERY_POOL, WRAPPED_SOL};
 use crate::error::JoGoLotteryErrorCode;
 use crate::instructions::utils::{transfer_sol, transfer_spl};
 use crate::state::LotteryPool;
+use crate::{generate_seeds, LOTTERY_POOL, WRAPPED_SOL};
 
 #[derive(Accounts)]
 pub struct CloseLotteryPool<'info> {

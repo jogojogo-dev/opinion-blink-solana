@@ -80,6 +80,8 @@ impl ClaimPrizeEntry {
                 false,
                 seeds,
             )?;
+        } else {
+            require!(lottery_pool.votes_prize[lottery_pool.winning_number as usize] == 0, JoGoLotteryErrorCode::InvalidVotePrize);
         }
 
         emit!(ClaimPrizeEvent {
