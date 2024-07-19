@@ -98,11 +98,10 @@ export async function claimPrizeFromLottery(
   userTokenAccount: Account,
   vaultTokenAccount: Account,
   userLottery: anchor.web3.PublicKey,
-  lotteryPoolPDA: anchor.web3.PublicKey,
-  withPrize: boolean
+  lotteryPoolPDA: anchor.web3.PublicKey
 ) {
   const tx = await program.methods
-    .claimPrize(withPrize)
+    .claimPrize()
     .accounts({
       admin: admin,
       owner: user.publicKey,
@@ -115,4 +114,25 @@ export async function claimPrizeFromLottery(
     .signers([user])
     .rpc();
   console.log("Claim prize transaction signature", tx);
+}
+
+export async function closeLotteryPool(
+  program: Program<JogoLottery>,
+  admin: anchor.web3.Keypair,
+  recipientTokenAccount: Account,
+  vaultTokenAccount: Account,
+  lotteryPoolPDA: anchor.web3.PublicKey
+) {
+  const tx = await program.methods
+    .closeLotteryPool()
+    .accounts({
+      admin: admin.publicKey,
+      adminTokenAccount: recipientTokenAccount.address,
+      lotteryPool: lotteryPoolPDA,
+      vaultTokenAccount: vaultTokenAccount.address,
+      systemProgram: anchor.web3.SystemProgram.programId,
+    })
+    .signers([admin])
+    .rpc();
+  console.log("Close LotteryPool transaction signature", tx);
 }

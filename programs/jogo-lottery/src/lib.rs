@@ -56,11 +56,11 @@ pub mod jogo_lottery {
         )
     }
 
-    pub fn claim_prize(ctx: Context<ClaimPrize>, with_prize: bool) -> Result<()> {
-        ClaimPrizeEntry::claim_prize(ctx, with_prize)
+    pub fn claim_prize(ctx: Context<ClaimPrize>) -> Result<()> {
+        ClaimPrizeEntry::claim_prize(ctx)
     }
 
-    // pub fn close_lottery_pool(ctx: Context<CloseLotteryPool>) -> Result<()> {
-    //     _close_lottery_pool(ctx)
-    // }
+    pub fn close_lottery_pool(ctx: Context<CloseLotteryPool>) -> Result<()> {
+        CloseLotteryPoolEntry::close_lottery_pool(ctx)
+    }
 }

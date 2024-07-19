@@ -38,7 +38,7 @@ pub struct ClaimPrizeEvent {
 pub struct ClaimPrizeEntry {}
 
 impl ClaimPrizeEntry {
-    pub(crate) fn claim_prize(ctx: Context<ClaimPrize>, with_prize: bool) -> Result<()> {
+    pub(crate) fn claim_prize(ctx: Context<ClaimPrize>) -> Result<()> {
         let lottery_pool_account_info = ctx.accounts.lottery_pool.to_account_info();
         let user_lottery = &mut ctx.accounts.user_lottery;
         let lottery_pool = &mut ctx.accounts.lottery_pool;
@@ -57,18 +57,21 @@ impl ClaimPrizeEntry {
         user_lottery.is_claimed = true;
         lottery_pool.claimed_count += 1;
 
-        let prize = 0;
-        if with_prize {
-            let prize = lottery_pool.calculate_prize(user_lottery.balance);
-            require!(prize > 0, JoGoLotteryErrorCode::NoPrize);
-            require!(
-                prize + lottery_pool.claimed_prize <= lottery_pool.bonus_prize + lottery_pool.prize,
-                JoGoLotteryErrorCode::InsufficientPrize
-            );
-            let actual_prize = prize - lottery_pool.lottery_fee * prize / 1000;
-            lottery_pool.claimed_prize += prize;
-            user_lottery.claimed_prize = prize; // store the claimed prize with fee
+        let prize = lottery_pool.calculate_prize(user_lottery.balance);
+        require!(prize > 0, JoGoLotteryErrorCode::NoPrize);
+        require!(
+            prize + lottery_pool.claimed_prize <= lottery_pool.bonus_prize + lottery_pool.prize,
+            JoGoLotteryErrorCode::InsufficientPrize
+        );
+        let mut actual_prize = prize - lottery_pool.lottery_fee * prize / 1000;
+        lottery_pool.claimed_prize += prize;
+        user_lottery.claimed_prize = prize; // store the claimed prize with fee
 
+        if actual_prize > ctx.accounts.vault_token_account.amount {
+            actual_prize = ctx.accounts.vault_token_account.amount;
+        }
+
+        if actual_prize > 0 {
             let admin_key = lottery_pool.admin.key();
             let seeds = generate_seeds!(lottery_pool, admin_key);
             transfer_spl(
@@ -80,11 +83,6 @@ impl ClaimPrizeEntry {
                 false,
                 seeds,
             )?;
-        } else {
-            require!(
-                lottery_pool.votes_prize[lottery_pool.winning_number as usize] == 0,
-                JoGoLotteryErrorCode::InvalidVotePrize
-            );
         }
 
         emit!(ClaimPrizeEvent {

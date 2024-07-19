@@ -243,12 +243,43 @@ export type JogoLottery = {
           isSigner: false;
         }
       ];
-      args: [
+      args: [];
+    },
+    {
+      name: "closeLotteryPool";
+      accounts: [
         {
-          name: "withPrize";
-          type: "bool";
+          name: "admin";
+          isMut: true;
+          isSigner: true;
+        },
+        {
+          name: "adminTokenAccount";
+          isMut: true;
+          isSigner: false;
+        },
+        {
+          name: "vaultTokenAccount";
+          isMut: true;
+          isSigner: false;
+        },
+        {
+          name: "lotteryPool";
+          isMut: true;
+          isSigner: false;
+        },
+        {
+          name: "tokenProgram";
+          isMut: false;
+          isSigner: false;
+        },
+        {
+          name: "systemProgram";
+          isMut: false;
+          isSigner: false;
         }
       ];
+      args: [];
     }
   ];
   accounts: [
@@ -862,12 +893,43 @@ export const IDL: JogoLottery = {
           isSigner: false,
         },
       ],
-      args: [
+      args: [],
+    },
+    {
+      name: "closeLotteryPool",
+      accounts: [
         {
-          name: "withPrize",
-          type: "bool",
+          name: "admin",
+          isMut: true,
+          isSigner: true,
+        },
+        {
+          name: "adminTokenAccount",
+          isMut: true,
+          isSigner: false,
+        },
+        {
+          name: "vaultTokenAccount",
+          isMut: true,
+          isSigner: false,
+        },
+        {
+          name: "lotteryPool",
+          isMut: true,
+          isSigner: false,
+        },
+        {
+          name: "tokenProgram",
+          isMut: false,
+          isSigner: false,
+        },
+        {
+          name: "systemProgram",
+          isMut: false,
+          isSigner: false,
         },
       ],
+      args: [],
     },
   ],
   accounts: [
