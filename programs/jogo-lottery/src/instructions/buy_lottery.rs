@@ -94,13 +94,13 @@ impl EnterLotteryPoolEntry {
         if total_cost > 0 {
             if use_sol {
                 require!(
-                ctx.accounts.vault_token_account.mint == Pubkey::from_str(WRAPPED_SOL).unwrap(),
-                JoGoLotteryErrorCode::InvalidMintAccount
-            );
+                    ctx.accounts.vault_token_account.mint == Pubkey::from_str(WRAPPED_SOL).unwrap(),
+                    JoGoLotteryErrorCode::InvalidMintAccount
+                );
                 require!(
-                ctx.accounts.vault_token_account.mint == ctx.accounts.user_token_account.mint,
-                JoGoLotteryErrorCode::InvalidMintAccount
-            );
+                    ctx.accounts.vault_token_account.mint == ctx.accounts.user_token_account.mint,
+                    JoGoLotteryErrorCode::InvalidMintAccount
+                );
                 // wrap sol to wrapped sol and transfer to vault_token_account
                 transfer_sol(
                     ctx.accounts.user.to_account_info(),

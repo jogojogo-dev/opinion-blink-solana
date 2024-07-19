@@ -33,14 +33,6 @@ pub mod jogo_lottery {
         )
     }
 
-    // pub fn prepare_draw_lottery(
-    //     ctx: Context<DrawLotteryPool>,
-    //     winning_number: u64,
-    //     bonus_lottery_prize: u64,
-    // ) -> Result<()> {
-    //     _draw_lottery_pool(ctx, winning_number, bonus_lottery_prize)
-    // }
-    //
     pub fn buy_lottery_ticket(
         ctx: Context<EnterLotteryPool>,
         vote_number: u64,
@@ -50,10 +42,24 @@ pub mod jogo_lottery {
         EnterLotteryPoolEntry::enter_lottery_pool(ctx, vote_number, buy_lottery_numbers, use_sol)
     }
 
-    // pub fn claim_prize(ctx: Context<ClaimPrize>) -> Result<()> {
-    //     _claim_prize(ctx)
-    // }
-    //
+    pub fn prepare_draw_lottery(
+        ctx: Context<DrawLotteryPool>,
+        winning_number: u64,
+        bonus_lottery_prize: u64,
+        use_sol: bool,
+    ) -> Result<()> {
+        DrawLotteryPoolEntry::draw_lottery_sol_pool(
+            ctx,
+            winning_number,
+            bonus_lottery_prize,
+            use_sol,
+        )
+    }
+
+    pub fn claim_prize(ctx: Context<ClaimPrize>, with_prize: bool) -> Result<()> {
+        ClaimPrizeEntry::claim_prize(ctx, with_prize)
+    }
+
     // pub fn close_lottery_pool(ctx: Context<CloseLotteryPool>) -> Result<()> {
     //     _close_lottery_pool(ctx)
     // }

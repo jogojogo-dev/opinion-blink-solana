@@ -5,6 +5,7 @@ use std::str::FromStr;
 use crate::error::JoGoLotteryErrorCode;
 use crate::instructions::utils::{transfer_sol, transfer_spl};
 use crate::state::LotteryPool;
+use crate::utils::wrap_sol;
 use crate::{generate_seeds, LOTTERY_POOL, WRAPPED_SOL};
 
 #[derive(Accounts)]
@@ -40,7 +41,6 @@ pub struct DrawLotteryPoolEvent {
 pub struct DrawLotteryPoolEntry {}
 
 impl DrawLotteryPoolEntry {
-
     pub(crate) fn draw_lottery_sol_pool(
         ctx: Context<DrawLotteryPool>,
         winning_number: u64,
@@ -53,9 +53,6 @@ impl DrawLotteryPoolEntry {
             lottery_pool.maximum_number >= winning_number && 0 < winning_number,
             JoGoLotteryErrorCode::InvalidWinningNumber
         );
-        lottery_pool.is_drawn = true;
-        lottery_pool.winning_number = winning_number;
-        lottery_pool.bonus_prize += bonus_lottery_prize;
 
         // Admin transfer bonus prize to vault
         if bonus_lottery_prize > 0 {
@@ -77,6 +74,13 @@ impl DrawLotteryPoolEntry {
                     true,
                     &[],
                 )?;
+                let admin_key = lottery_pool.admin.key();
+                let seeds = generate_seeds!(lottery_pool, admin_key);
+                wrap_sol(
+                    ctx.accounts.vault_token_account.to_account_info(),
+                    ctx.accounts.token_program.to_account_info(),
+                    seeds,
+                )?;
             } else {
                 transfer_spl(
                     ctx.accounts.admin_token_account.to_account_info(),
@@ -89,6 +93,10 @@ impl DrawLotteryPoolEntry {
                 )?;
             }
         }
+
+        lottery_pool.is_drawn = true;
+        lottery_pool.winning_number = winning_number;
+        lottery_pool.bonus_prize += bonus_lottery_prize;
 
         // Vault transfer fee to recipient as wrapped sol
         let fee = lottery_pool.calculate_prize_fee();

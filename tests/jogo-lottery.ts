@@ -3,69 +3,17 @@ import { Program } from "@coral-xyz/anchor";
 import { JogoLottery } from "../target/types/jogo_lottery";
 import {
   Account,
-  createWrappedNativeAccount,
   createSyncNativeInstruction,
+  createWrappedNativeAccount,
   getOrCreateAssociatedTokenAccount,
 } from "@solana/spl-token";
 import { assert } from "chai";
-
-async function InitLotteryPool(
-  program: Program<JogoLottery>,
-  admin: anchor.web3.Keypair,
-  lotteryPool: anchor.web3.PublicKey,
-  vaultTokenAccount: Account,
-  mintAccount: anchor.web3.PublicKey,
-  poolId: number[],
-  maximumNumber: number,
-  price: number,
-  fee: number
-) {
-  const tx = await program.methods
-    .initLotteryPool(
-      poolId,
-      new anchor.BN(maximumNumber),
-      new anchor.BN(price),
-      new anchor.BN(fee)
-    )
-    .accounts({
-      admin: admin.publicKey,
-      lotteryPool: lotteryPool,
-      vaultTokenAccount: vaultTokenAccount.address,
-      mintAccount: mintAccount,
-    })
-    .signers([admin])
-    .rpc();
-  console.log("Initialize transaction signature success: ", tx);
-}
-
-async function EnterLotteryPool(
-  program: Program<JogoLottery>,
-  user: anchor.web3.Keypair,
-  lotteryPool: anchor.web3.PublicKey,
-  userTokenAccount: anchor.web3.PublicKey,
-  vaultTokenAccount: Account,
-  userLottery: anchor.web3.PublicKey,
-  voteNumber: number,
-  buyLotteryNumbers: number,
-  useSol: boolean
-) {
-  const tx = await program.methods
-    .buyLotteryTicket(
-      new anchor.BN(voteNumber),
-      new anchor.BN(buyLotteryNumbers),
-      useSol
-    )
-    .accounts({
-      user: user.publicKey,
-      lotteryPool: lotteryPool,
-      vaultTokenAccount: vaultTokenAccount.address,
-      userTokenAccount: userTokenAccount,
-      userLottery: userLottery,
-    })
-    .signers([user])
-    .rpc();
-  console.log("BuyLotteryTicket transaction signature success: ", tx);
-}
+import {
+  claimPrizeFromLottery,
+  EnterLotteryPool,
+  InitLotteryPool,
+  PrepareDrawLottery,
+} from "./utils";
 
 describe("jogo-lottery", () => {
   const admin = anchor.web3.Keypair.generate();
@@ -95,6 +43,7 @@ describe("jogo-lottery", () => {
       program.programId
     );
     let vaultTokenAccount: Account;
+    let adminTokenAccount: Account;
     before(async () => {
       const tx = await provider.connection.requestAirdrop(
         admin.publicKey,
@@ -132,6 +81,13 @@ describe("jogo-lottery", () => {
         lotteryPoolPDA,
         true
       );
+      adminTokenAccount = await getOrCreateAssociatedTokenAccount(
+        provider.connection,
+        admin,
+        mintAccount,
+        admin.publicKey,
+        true
+      );
     });
 
     it("Initialize LotteryPool", async () => {
@@ -148,10 +104,14 @@ describe("jogo-lottery", () => {
       );
     });
 
+    const userNumbers = 20;
+    let userCostTotal = 0;
+
     it("Multiple buy lottery with sol", async () => {
       let vaultTokenAccountSOLBalanceBefore =
         await provider.connection.getBalance(vaultTokenAccount.address);
-      for (let i = 0; i < 10; i++) {
+      for (let i = 0; i < userNumbers; i++) {
+        userCostTotal += 1_000_000_000;
         const randomVoteNumber = Math.floor(Math.random() * 4) + 1;
         const [userLotteryPDA, _] =
           anchor.web3.PublicKey.findProgramAddressSync(
@@ -182,13 +142,13 @@ describe("jogo-lottery", () => {
           true
         );
       }
-      const lotteryPool = await program.account.lotteryPool.fetch(
+      const lotteryPoolData = await program.account.lotteryPool.fetch(
         lotteryPoolPDA
       );
       assert.equal(
-        lotteryPool.prize.toNumber(),
-        10_000_000_000,
-        "Total prize should be 10_000_000_000"
+        lotteryPoolData.prize.toNumber(),
+        userCostTotal,
+        `Total prize should be ${userCostTotal.toString()}`
       );
       const vaultTokenAccountInfo =
         await provider.connection.getTokenAccountBalance(
@@ -196,44 +156,47 @@ describe("jogo-lottery", () => {
         );
       assert.equal(
         vaultTokenAccountInfo.value.amount,
-        new anchor.BN(10_000_000_000).toString()
+        new anchor.BN(userCostTotal).toString()
       );
       let vaultTokenAccountSOLBalanceAfter =
         await provider.connection.getBalance(vaultTokenAccount.address);
       assert.equal(
         vaultTokenAccountSOLBalanceAfter - vaultTokenAccountSOLBalanceBefore,
-        10_000_000_000,
-        "Vault token account SOL balance should be 10_000_000_000"
+        userCostTotal,
+        `Vault token account SOL balance should be ${userCostTotal.toString()}`
       );
     });
+
     it("Multiple buy lottery without sol", async () => {
-      let userTokenAccounts: anchor.web3.PublicKey[] = []
-      for (let i = 0; i < 10; i++) {
+      let userTokenAccounts: anchor.web3.PublicKey[] = [];
+      for (let i = 0; i < userNumbers; i++) {
+        userCostTotal += 1_000_000_000;
         let userTokenAccount;
         try {
           userTokenAccount = await createWrappedNativeAccount(
-              provider.connection,
-              users[i],
-              users[i].publicKey,
-              1_000_000_000
+            provider.connection,
+            users[i],
+            users[i].publicKey,
+            1_000_000_000
           );
         } catch (e) {
           const userTokenAccountInfo = await getOrCreateAssociatedTokenAccount(
-              provider.connection,
-              users[i],
-              mintAccount,
-              users[i].publicKey,
-              true
+            provider.connection,
+            users[i],
+            mintAccount,
+            users[i].publicKey,
+            true
           );
           userTokenAccount = userTokenAccountInfo.address;
           const latestBlockHash =
-              await provider.connection.getLatestBlockhash();
+            await provider.connection.getLatestBlockhash();
           const transferInstruction = anchor.web3.SystemProgram.transfer({
             fromPubkey: users[i].publicKey,
             toPubkey: userTokenAccount,
             lamports: 1_000_000_000,
           });
-          const syncNativeInstruction = createSyncNativeInstruction(userTokenAccount)
+          const syncNativeInstruction =
+            createSyncNativeInstruction(userTokenAccount);
           const messageV0 = new anchor.web3.TransactionMessage({
             payerKey: users[i].publicKey,
             recentBlockhash: latestBlockHash.blockhash,
@@ -242,35 +205,38 @@ describe("jogo-lottery", () => {
           const transaction = new anchor.web3.VersionedTransaction(messageV0);
           transaction.sign([users[i]]);
           const signature = await provider.connection.sendTransaction(
-              transaction,
-              {skipPreflight: false}
+            transaction,
+            { skipPreflight: false }
           );
           await provider.connection.confirmTransaction(
-              {
-                blockhash: latestBlockHash.blockhash,
-                lastValidBlockHeight: latestBlockHash.lastValidBlockHeight,
-                signature: signature,
-              },
-              "confirmed"
+            {
+              blockhash: latestBlockHash.blockhash,
+              lastValidBlockHeight: latestBlockHash.lastValidBlockHeight,
+              signature: signature,
+            },
+            "confirmed"
           );
           console.log("Transfer SOL to userTokenAccount success: ", signature);
         }
         userTokenAccounts.push(userTokenAccount);
-        let userTokenAccountBalance = await provider.connection.getTokenAccountBalance(userTokenAccount)
-        console.log(`${userTokenAccount} balance: ${userTokenAccountBalance.value.amount}`);
+        let userTokenAccountBalance =
+          await provider.connection.getTokenAccountBalance(userTokenAccount);
+        console.log(
+          `${userTokenAccount} balance: ${userTokenAccountBalance.value.amount}`
+        );
       }
-      for (let i = 0; i < 10; i++) {
+      for (let i = 0; i < userNumbers; i++) {
         const randomVoteNumber = Math.floor(Math.random() * 4) + 1;
         const [userLotteryPDA, _] =
-            anchor.web3.PublicKey.findProgramAddressSync(
-                [
-                  Buffer.from(USER_LOTTERY_CONST),
-                  lotteryPoolPDA.toBuffer(),
-                  users[i].publicKey.toBuffer(),
-                  Buffer.from([randomVoteNumber]),
-                ],
-                program.programId
-            );
+          anchor.web3.PublicKey.findProgramAddressSync(
+            [
+              Buffer.from(USER_LOTTERY_CONST),
+              lotteryPoolPDA.toBuffer(),
+              users[i].publicKey.toBuffer(),
+              Buffer.from([randomVoteNumber]),
+            ],
+            program.programId
+          );
 
         await EnterLotteryPool(
           program,
@@ -282,6 +248,158 @@ describe("jogo-lottery", () => {
           randomVoteNumber,
           1,
           false
+        );
+      }
+    });
+
+    it("Draw LotteryPool", async () => {
+      const recipient = anchor.web3.Keypair.generate();
+      const recipientTokenAccount = await getOrCreateAssociatedTokenAccount(
+        provider.connection,
+        admin,
+        mintAccount,
+        recipient.publicKey,
+        true
+      );
+      let recipientBalanceBefore =
+        await program.provider.connection.getTokenAccountBalance(
+          recipientTokenAccount.address
+        );
+      let randomWinningNumber = Math.floor(Math.random() * 4) + 1;
+
+      assert.equal(
+        Number(recipientBalanceBefore.value.amount),
+        0,
+        "Recipient balance should be zero"
+      );
+      let lotteryPoolData = await program.account.lotteryPool.fetch(
+        lotteryPoolPDA
+      );
+      assert.equal(
+        lotteryPoolData.isDrawn,
+        false,
+        "Lottery pool should not be drawn"
+      );
+      assert.equal(randomWinningNumber != 0, true, "Can not be zero");
+
+      await PrepareDrawLottery(
+        program,
+        admin,
+        adminTokenAccount,
+        vaultTokenAccount,
+        recipientTokenAccount,
+        lotteryPoolPDA,
+        randomWinningNumber,
+        500_000_000_000,
+        true
+      );
+
+      lotteryPoolData = await program.account.lotteryPool.fetch(lotteryPoolPDA);
+      let recipientBalanceAfter =
+        await program.provider.connection.getTokenAccountBalance(
+          recipientTokenAccount.address
+        );
+      let fee = new anchor.BN(500_000_000_000)
+        .add(new anchor.BN(userCostTotal))
+        .mul(new anchor.BN(200))
+        .div(new anchor.BN(1000));
+      assert.equal(
+        Number(recipientBalanceAfter.value.amount),
+        fee.toNumber(),
+        `Recipient balance should be ${fee.toNumber()}`
+      );
+      assert.equal(
+        lotteryPoolData.isDrawn,
+        true,
+        "Lottery pool should be drawn"
+      );
+      assert.equal(
+        lotteryPoolData.winningNumber.toNumber(),
+        randomWinningNumber,
+        `Winning number should be ${randomWinningNumber}`
+      );
+    });
+
+    it("Claim Prize", async () => {
+      let lotteryPoolData = await program.account.lotteryPool.fetch(
+        lotteryPoolPDA
+      );
+      let prize = lotteryPoolData.prize;
+      let bonusPrize = lotteryPoolData.bonusPrize;
+      let votesPrize = lotteryPoolData.votesPrize;
+      for (let i = 0; i < userNumbers; i++) {
+        let userLottery: anchor.web3.PublicKey;
+        try {
+          const [userLotteryPDA, userLotteryBump] =
+            anchor.web3.PublicKey.findProgramAddressSync(
+              [
+                Buffer.from(USER_LOTTERY_CONST),
+                lotteryPoolPDA.toBuffer(),
+                users[i].publicKey.toBuffer(),
+                Buffer.from([lotteryPoolData.winningNumber.toNumber()]),
+              ],
+              program.programId
+            );
+          const userLotteryData = await program.account.userLottery.fetch(
+            userLotteryPDA
+          );
+          if (userLotteryData.balance.toNumber() == 0) continue;
+          userLottery = userLotteryPDA;
+        } catch (e) {
+          continue;
+        }
+
+        const userTokenAccount = await getOrCreateAssociatedTokenAccount(
+          provider.connection,
+          users[i],
+          mintAccount,
+          users[i].publicKey,
+          true
+        );
+
+        const userTokenAccountBalanceBefore =
+          await provider.connection.getTokenAccountBalance(
+            userTokenAccount.address
+          );
+        await claimPrizeFromLottery(
+          program,
+          admin.publicKey,
+          users[i],
+          userTokenAccount,
+          vaultTokenAccount,
+          userLottery,
+          lotteryPoolPDA,
+          true
+        );
+        const userLotteryData = await program.account.userLottery.fetch(
+          userLottery
+        );
+        const claimedReward = userLotteryData.balance
+          .mul(prize.add(bonusPrize))
+          .div(votesPrize[lotteryPoolData.winningNumber.toNumber()]);
+        const actualReward = claimedReward.sub(
+          claimedReward.mul(new anchor.BN(200)).div(new anchor.BN(1000))
+        );
+        assert.isAtMost(
+          userLotteryData.claimedPrize
+            .sub(
+              userLotteryData.claimedPrize
+                .mul(new anchor.BN(200))
+                .div(new anchor.BN(1000))
+            )
+            .toNumber(),
+          actualReward.toNumber(),
+          "Claim reward should be equal to balance"
+        );
+        const userTokenAccountBalanceAfter =
+          await provider.connection.getTokenAccountBalance(
+            userTokenAccount.address
+          );
+        assert.equal(
+          Number(userTokenAccountBalanceAfter.value.amount) -
+            Number(userTokenAccountBalanceBefore.value.amount),
+          actualReward.toNumber(),
+          `User token account diff balance should be ${claimedReward.toString()}`
         );
       }
     });

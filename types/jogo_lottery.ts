@@ -3,9 +3,9 @@ export type JogoLottery = {
   name: "jogo_lottery";
   constants: [
     {
-      name: "SEED";
+      name: "WRAPPED_SOL";
       type: "string";
-      value: '"anchor"';
+      value: '"So11111111111111111111111111111111111111112"';
     },
     {
       name: "MAX_VOTE_NUMBERS";
@@ -23,11 +23,6 @@ export type JogoLottery = {
       name: "LOTTERY_POOL";
       type: "bytes";
       value: "[108, 111, 116, 116, 101, 114, 121, 95, 112, 111, 111, 108]";
-    },
-    {
-      name: "LOTTERY_POOL_SOL";
-      type: "bytes";
-      value: "[108, 111, 116, 116, 101, 114, 121, 95, 112, 111, 111, 108, 95, 115, 111, 108]";
     }
   ];
   instructions: [
@@ -45,12 +40,32 @@ export type JogoLottery = {
           isSigner: false;
         },
         {
-          name: "vaultAccount";
+          name: "vaultTokenAccount";
           isMut: true;
           isSigner: false;
         },
         {
+          name: "mintAccount";
+          isMut: false;
+          isSigner: false;
+        },
+        {
+          name: "tokenProgram";
+          isMut: false;
+          isSigner: false;
+        },
+        {
           name: "systemProgram";
+          isMut: false;
+          isSigner: false;
+        },
+        {
+          name: "associatedTokenProgram";
+          isMut: false;
+          isSigner: false;
+        },
+        {
+          name: "rent";
           isMut: false;
           isSigner: false;
         }
@@ -77,46 +92,6 @@ export type JogoLottery = {
       ];
     },
     {
-      name: "prepareDrawLottery";
-      accounts: [
-        {
-          name: "admin";
-          isMut: true;
-          isSigner: true;
-        },
-        {
-          name: "vaultAccount";
-          isMut: true;
-          isSigner: false;
-        },
-        {
-          name: "recipient";
-          isMut: true;
-          isSigner: false;
-        },
-        {
-          name: "lotteryPool";
-          isMut: true;
-          isSigner: false;
-        },
-        {
-          name: "systemProgram";
-          isMut: false;
-          isSigner: false;
-        }
-      ];
-      args: [
-        {
-          name: "winningNumber";
-          type: "u64";
-        },
-        {
-          name: "bonusLotteryPrize";
-          type: "u64";
-        }
-      ];
-    },
-    {
       name: "buyLotteryTicket";
       accounts: [
         {
@@ -130,13 +105,23 @@ export type JogoLottery = {
           isSigner: false;
         },
         {
-          name: "vaultAccount";
+          name: "userTokenAccount";
+          isMut: true;
+          isSigner: false;
+        },
+        {
+          name: "vaultTokenAccount";
           isMut: true;
           isSigner: false;
         },
         {
           name: "userLottery";
           isMut: true;
+          isSigner: false;
+        },
+        {
+          name: "tokenProgram";
+          isMut: false;
           isSigner: false;
         },
         {
@@ -153,6 +138,64 @@ export type JogoLottery = {
         {
           name: "buyLotteryNumbers";
           type: "u64";
+        },
+        {
+          name: "useSol";
+          type: "bool";
+        }
+      ];
+    },
+    {
+      name: "prepareDrawLottery";
+      accounts: [
+        {
+          name: "admin";
+          isMut: true;
+          isSigner: true;
+        },
+        {
+          name: "adminTokenAccount";
+          isMut: true;
+          isSigner: false;
+        },
+        {
+          name: "vaultTokenAccount";
+          isMut: true;
+          isSigner: false;
+        },
+        {
+          name: "recipient";
+          isMut: true;
+          isSigner: false;
+        },
+        {
+          name: "lotteryPool";
+          isMut: true;
+          isSigner: false;
+        },
+        {
+          name: "tokenProgram";
+          isMut: false;
+          isSigner: false;
+        },
+        {
+          name: "systemProgram";
+          isMut: false;
+          isSigner: false;
+        }
+      ];
+      args: [
+        {
+          name: "winningNumber";
+          type: "u64";
+        },
+        {
+          name: "bonusLotteryPrize";
+          type: "u64";
+        },
+        {
+          name: "useSol";
+          type: "bool";
         }
       ];
     },
@@ -160,12 +203,17 @@ export type JogoLottery = {
       name: "claimPrize";
       accounts: [
         {
+          name: "admin";
+          isMut: false;
+          isSigner: false;
+        },
+        {
           name: "userLottery";
           isMut: true;
           isSigner: false;
         },
         {
-          name: "vaultAccount";
+          name: "vaultTokenAccount";
           isMut: true;
           isSigner: false;
         },
@@ -175,6 +223,11 @@ export type JogoLottery = {
           isSigner: true;
         },
         {
+          name: "userTokenAccount";
+          isMut: true;
+          isSigner: false;
+        },
+        {
           name: "lotteryPool";
           isMut: true;
           isSigner: false;
@@ -183,35 +236,19 @@ export type JogoLottery = {
           name: "systemProgram";
           isMut: false;
           isSigner: false;
-        }
-      ];
-      args: [];
-    },
-    {
-      name: "closeLotteryPool";
-      accounts: [
-        {
-          name: "admin";
-          isMut: true;
-          isSigner: true;
         },
         {
-          name: "lotteryPool";
-          isMut: true;
-          isSigner: false;
-        },
-        {
-          name: "vaultAccount";
-          isMut: true;
-          isSigner: false;
-        },
-        {
-          name: "systemProgram";
+          name: "tokenProgram";
           isMut: false;
           isSigner: false;
         }
       ];
-      args: [];
+      args: [
+        {
+          name: "withPrize";
+          type: "bool";
+        }
+      ];
     }
   ];
   accounts: [
@@ -257,13 +294,15 @@ export type JogoLottery = {
             type: "u8";
           },
           {
-            name: "vaultBump";
-            type: "u8";
-          },
-          {
             name: "poolId";
             type: {
               array: ["u8", 32];
+            };
+          },
+          {
+            name: "votesCount";
+            type: {
+              array: ["u64", 16];
             };
           },
           {
@@ -326,36 +365,6 @@ export type JogoLottery = {
   ];
   events: [
     {
-      name: "InitLotteryPoolEvent";
-      fields: [
-        {
-          name: "admin";
-          type: "publicKey";
-          index: false;
-        },
-        {
-          name: "lotteryPool";
-          type: "publicKey";
-          index: false;
-        },
-        {
-          name: "maximumNumber";
-          type: "u64";
-          index: false;
-        },
-        {
-          name: "entryLotteryPrice";
-          type: "u64";
-          index: false;
-        },
-        {
-          name: "lotteryFee";
-          type: "u64";
-          index: false;
-        }
-      ];
-    },
-    {
       name: "EnterLotteryPoolEvent";
       fields: [
         {
@@ -388,6 +397,50 @@ export type JogoLottery = {
       ];
     },
     {
+      name: "ClaimPrizeEvent";
+      fields: [
+        {
+          name: "poolId";
+          type: {
+            array: ["u8", 32];
+          };
+          index: true;
+        },
+        {
+          name: "lotteryPool";
+          type: "publicKey";
+          index: true;
+        },
+        {
+          name: "user";
+          type: "publicKey";
+          index: true;
+        },
+        {
+          name: "prize";
+          type: "u64";
+          index: false;
+        }
+      ];
+    },
+    {
+      name: "CloseLotteryPoolEvent";
+      fields: [
+        {
+          name: "poolId";
+          type: {
+            array: ["u8", 32];
+          };
+          index: true;
+        },
+        {
+          name: "lotteryPool";
+          type: "publicKey";
+          index: true;
+        }
+      ];
+    },
+    {
       name: "DrawLotteryPoolEvent";
       fields: [
         {
@@ -411,31 +464,39 @@ export type JogoLottery = {
           name: "recipient";
           type: "publicKey";
           index: false;
+        },
+        {
+          name: "fee";
+          type: "u64";
+          index: false;
         }
       ];
     },
     {
-      name: "ClaimPrizeEvent";
+      name: "InitLotteryPoolEvent";
       fields: [
         {
-          name: "poolId";
-          type: {
-            array: ["u8", 32];
-          };
-          index: true;
+          name: "admin";
+          type: "publicKey";
+          index: false;
         },
         {
           name: "lotteryPool";
           type: "publicKey";
-          index: true;
+          index: false;
         },
         {
-          name: "user";
-          type: "publicKey";
-          index: true;
+          name: "maximumNumber";
+          type: "u64";
+          index: false;
         },
         {
-          name: "prize";
+          name: "entryLotteryPrice";
+          type: "u64";
+          index: false;
+        },
+        {
+          name: "lotteryFee";
           type: "u64";
           index: false;
         }
@@ -495,48 +556,63 @@ export type JogoLottery = {
     },
     {
       code: 6010;
+      name: "MismatchLotteryPool";
+      msg: "LotteryPool mismatch";
+    },
+    {
+      code: 6011;
       name: "InvalidAdminRole";
       msg: "Invalid admin role";
     },
     {
-      code: 6011;
+      code: 6012;
       name: "InvalidDeadline";
       msg: "Invalid deadline";
     },
     {
-      code: 6012;
+      code: 6013;
       name: "InvalidVoteNumber";
       msg: "Invalid vote number";
     },
     {
-      code: 6013;
+      code: 6014;
       name: "InvalidPoolId";
       msg: "Invalid pool id";
     },
     {
-      code: 6014;
+      code: 6015;
       name: "InvalidUser";
       msg: "Invalid user";
     },
     {
-      code: 6015;
+      code: 6016;
       name: "InvalidTimestamp";
       msg: "Invalid timestamp";
     },
     {
-      code: 6016;
+      code: 6017;
       name: "InvalidWinningNumber";
       msg: "Invalid winning number";
     },
     {
-      code: 6017;
+      code: 6018;
       name: "InvalidBuyLotteryNumbers";
       msg: "Invalid buy lottery numbers";
     },
     {
-      code: 6018;
+      code: 6019;
       name: "InvalidLotteryFee";
       msg: "Invalid lottery fee";
+    },
+    {
+      code: 6020;
+      name: "InvalidMintAccount";
+      msg: "Invalid mint account";
+    },
+    {
+      code: 6021;
+      name: "InvalidVotePrize";
+      msg: "Invalid vote prize";
     }
   ];
 };
@@ -546,9 +622,9 @@ export const IDL: JogoLottery = {
   name: "jogo_lottery",
   constants: [
     {
-      name: "SEED",
+      name: "WRAPPED_SOL",
       type: "string",
-      value: '"anchor"',
+      value: '"So11111111111111111111111111111111111111112"',
     },
     {
       name: "MAX_VOTE_NUMBERS",
@@ -567,12 +643,6 @@ export const IDL: JogoLottery = {
       type: "bytes",
       value: "[108, 111, 116, 116, 101, 114, 121, 95, 112, 111, 111, 108]",
     },
-    {
-      name: "LOTTERY_POOL_SOL",
-      type: "bytes",
-      value:
-        "[108, 111, 116, 116, 101, 114, 121, 95, 112, 111, 111, 108, 95, 115, 111, 108]",
-    },
   ],
   instructions: [
     {
@@ -589,12 +659,32 @@ export const IDL: JogoLottery = {
           isSigner: false,
         },
         {
-          name: "vaultAccount",
+          name: "vaultTokenAccount",
           isMut: true,
           isSigner: false,
         },
         {
+          name: "mintAccount",
+          isMut: false,
+          isSigner: false,
+        },
+        {
+          name: "tokenProgram",
+          isMut: false,
+          isSigner: false,
+        },
+        {
           name: "systemProgram",
+          isMut: false,
+          isSigner: false,
+        },
+        {
+          name: "associatedTokenProgram",
+          isMut: false,
+          isSigner: false,
+        },
+        {
+          name: "rent",
           isMut: false,
           isSigner: false,
         },
@@ -621,46 +711,6 @@ export const IDL: JogoLottery = {
       ],
     },
     {
-      name: "prepareDrawLottery",
-      accounts: [
-        {
-          name: "admin",
-          isMut: true,
-          isSigner: true,
-        },
-        {
-          name: "vaultAccount",
-          isMut: true,
-          isSigner: false,
-        },
-        {
-          name: "recipient",
-          isMut: true,
-          isSigner: false,
-        },
-        {
-          name: "lotteryPool",
-          isMut: true,
-          isSigner: false,
-        },
-        {
-          name: "systemProgram",
-          isMut: false,
-          isSigner: false,
-        },
-      ],
-      args: [
-        {
-          name: "winningNumber",
-          type: "u64",
-        },
-        {
-          name: "bonusLotteryPrize",
-          type: "u64",
-        },
-      ],
-    },
-    {
       name: "buyLotteryTicket",
       accounts: [
         {
@@ -674,13 +724,23 @@ export const IDL: JogoLottery = {
           isSigner: false,
         },
         {
-          name: "vaultAccount",
+          name: "userTokenAccount",
+          isMut: true,
+          isSigner: false,
+        },
+        {
+          name: "vaultTokenAccount",
           isMut: true,
           isSigner: false,
         },
         {
           name: "userLottery",
           isMut: true,
+          isSigner: false,
+        },
+        {
+          name: "tokenProgram",
+          isMut: false,
           isSigner: false,
         },
         {
@@ -698,18 +758,81 @@ export const IDL: JogoLottery = {
           name: "buyLotteryNumbers",
           type: "u64",
         },
+        {
+          name: "useSol",
+          type: "bool",
+        },
+      ],
+    },
+    {
+      name: "prepareDrawLottery",
+      accounts: [
+        {
+          name: "admin",
+          isMut: true,
+          isSigner: true,
+        },
+        {
+          name: "adminTokenAccount",
+          isMut: true,
+          isSigner: false,
+        },
+        {
+          name: "vaultTokenAccount",
+          isMut: true,
+          isSigner: false,
+        },
+        {
+          name: "recipient",
+          isMut: true,
+          isSigner: false,
+        },
+        {
+          name: "lotteryPool",
+          isMut: true,
+          isSigner: false,
+        },
+        {
+          name: "tokenProgram",
+          isMut: false,
+          isSigner: false,
+        },
+        {
+          name: "systemProgram",
+          isMut: false,
+          isSigner: false,
+        },
+      ],
+      args: [
+        {
+          name: "winningNumber",
+          type: "u64",
+        },
+        {
+          name: "bonusLotteryPrize",
+          type: "u64",
+        },
+        {
+          name: "useSol",
+          type: "bool",
+        },
       ],
     },
     {
       name: "claimPrize",
       accounts: [
         {
+          name: "admin",
+          isMut: false,
+          isSigner: false,
+        },
+        {
           name: "userLottery",
           isMut: true,
           isSigner: false,
         },
         {
-          name: "vaultAccount",
+          name: "vaultTokenAccount",
           isMut: true,
           isSigner: false,
         },
@@ -719,6 +842,11 @@ export const IDL: JogoLottery = {
           isSigner: true,
         },
         {
+          name: "userTokenAccount",
+          isMut: true,
+          isSigner: false,
+        },
+        {
           name: "lotteryPool",
           isMut: true,
           isSigner: false,
@@ -728,34 +856,18 @@ export const IDL: JogoLottery = {
           isMut: false,
           isSigner: false,
         },
-      ],
-      args: [],
-    },
-    {
-      name: "closeLotteryPool",
-      accounts: [
         {
-          name: "admin",
-          isMut: true,
-          isSigner: true,
-        },
-        {
-          name: "lotteryPool",
-          isMut: true,
-          isSigner: false,
-        },
-        {
-          name: "vaultAccount",
-          isMut: true,
-          isSigner: false,
-        },
-        {
-          name: "systemProgram",
+          name: "tokenProgram",
           isMut: false,
           isSigner: false,
         },
       ],
-      args: [],
+      args: [
+        {
+          name: "withPrize",
+          type: "bool",
+        },
+      ],
     },
   ],
   accounts: [
@@ -801,13 +913,15 @@ export const IDL: JogoLottery = {
             type: "u8",
           },
           {
-            name: "vaultBump",
-            type: "u8",
-          },
-          {
             name: "poolId",
             type: {
               array: ["u8", 32],
+            },
+          },
+          {
+            name: "votesCount",
+            type: {
+              array: ["u64", 16],
             },
           },
           {
@@ -870,36 +984,6 @@ export const IDL: JogoLottery = {
   ],
   events: [
     {
-      name: "InitLotteryPoolEvent",
-      fields: [
-        {
-          name: "admin",
-          type: "publicKey",
-          index: false,
-        },
-        {
-          name: "lotteryPool",
-          type: "publicKey",
-          index: false,
-        },
-        {
-          name: "maximumNumber",
-          type: "u64",
-          index: false,
-        },
-        {
-          name: "entryLotteryPrice",
-          type: "u64",
-          index: false,
-        },
-        {
-          name: "lotteryFee",
-          type: "u64",
-          index: false,
-        },
-      ],
-    },
-    {
       name: "EnterLotteryPoolEvent",
       fields: [
         {
@@ -932,6 +1016,50 @@ export const IDL: JogoLottery = {
       ],
     },
     {
+      name: "ClaimPrizeEvent",
+      fields: [
+        {
+          name: "poolId",
+          type: {
+            array: ["u8", 32],
+          },
+          index: true,
+        },
+        {
+          name: "lotteryPool",
+          type: "publicKey",
+          index: true,
+        },
+        {
+          name: "user",
+          type: "publicKey",
+          index: true,
+        },
+        {
+          name: "prize",
+          type: "u64",
+          index: false,
+        },
+      ],
+    },
+    {
+      name: "CloseLotteryPoolEvent",
+      fields: [
+        {
+          name: "poolId",
+          type: {
+            array: ["u8", 32],
+          },
+          index: true,
+        },
+        {
+          name: "lotteryPool",
+          type: "publicKey",
+          index: true,
+        },
+      ],
+    },
+    {
       name: "DrawLotteryPoolEvent",
       fields: [
         {
@@ -956,30 +1084,38 @@ export const IDL: JogoLottery = {
           type: "publicKey",
           index: false,
         },
+        {
+          name: "fee",
+          type: "u64",
+          index: false,
+        },
       ],
     },
     {
-      name: "ClaimPrizeEvent",
+      name: "InitLotteryPoolEvent",
       fields: [
         {
-          name: "poolId",
-          type: {
-            array: ["u8", 32],
-          },
-          index: true,
+          name: "admin",
+          type: "publicKey",
+          index: false,
         },
         {
           name: "lotteryPool",
           type: "publicKey",
-          index: true,
+          index: false,
         },
         {
-          name: "user",
-          type: "publicKey",
-          index: true,
+          name: "maximumNumber",
+          type: "u64",
+          index: false,
         },
         {
-          name: "prize",
+          name: "entryLotteryPrice",
+          type: "u64",
+          index: false,
+        },
+        {
+          name: "lotteryFee",
           type: "u64",
           index: false,
         },
@@ -1039,48 +1175,63 @@ export const IDL: JogoLottery = {
     },
     {
       code: 6010,
+      name: "MismatchLotteryPool",
+      msg: "LotteryPool mismatch",
+    },
+    {
+      code: 6011,
       name: "InvalidAdminRole",
       msg: "Invalid admin role",
     },
     {
-      code: 6011,
+      code: 6012,
       name: "InvalidDeadline",
       msg: "Invalid deadline",
     },
     {
-      code: 6012,
+      code: 6013,
       name: "InvalidVoteNumber",
       msg: "Invalid vote number",
     },
     {
-      code: 6013,
+      code: 6014,
       name: "InvalidPoolId",
       msg: "Invalid pool id",
     },
     {
-      code: 6014,
+      code: 6015,
       name: "InvalidUser",
       msg: "Invalid user",
     },
     {
-      code: 6015,
+      code: 6016,
       name: "InvalidTimestamp",
       msg: "Invalid timestamp",
     },
     {
-      code: 6016,
+      code: 6017,
       name: "InvalidWinningNumber",
       msg: "Invalid winning number",
     },
     {
-      code: 6017,
+      code: 6018,
       name: "InvalidBuyLotteryNumbers",
       msg: "Invalid buy lottery numbers",
     },
     {
-      code: 6018,
+      code: 6019,
       name: "InvalidLotteryFee",
       msg: "Invalid lottery fee",
+    },
+    {
+      code: 6020,
+      name: "InvalidMintAccount",
+      msg: "Invalid mint account",
+    },
+    {
+      code: 6021,
+      name: "InvalidVotePrize",
+      msg: "Invalid vote prize",
     },
   ],
 };

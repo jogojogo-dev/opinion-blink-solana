@@ -3,7 +3,8 @@ use anchor_lang::context::CpiContext;
 use anchor_lang::prelude::*;
 use anchor_lang::system_program::{transfer as sol_transfer, Transfer as SOLTransfer};
 use anchor_spl::token::{
-    sync_native, transfer as spl_transfer, SyncNative, Transfer as SPLTransfer,
+    close_account, sync_native, transfer as spl_transfer, CloseAccount, SyncNative,
+    Transfer as SPLTransfer,
 };
 
 pub(crate) fn transfer_sol<'a>(
@@ -58,6 +59,27 @@ pub(crate) fn transfer_spl<'a>(
         );
     }
     spl_transfer(transfer_spl_ctx, amount)?;
+    Ok(())
+}
+
+pub fn close_pda_account<'a>(
+    from: AccountInfo<'a>,
+    to: AccountInfo<'a>,
+    authority: AccountInfo<'a>,
+    token_program: AccountInfo<'a>,
+    seeds: &[&[u8]],
+) -> Result<()> {
+    let signed_seeds = &[&seeds[..]];
+    let close_account_ctx = CpiContext::new_with_signer(
+        token_program,
+        CloseAccount {
+            account: from,
+            destination: to,
+            authority,
+        },
+        signed_seeds,
+    );
+    close_account(close_account_ctx)?;
     Ok(())
 }
 

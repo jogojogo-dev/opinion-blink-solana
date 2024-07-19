@@ -38,7 +38,7 @@ pub struct ClaimPrizeEvent {
 pub struct ClaimPrizeEntry {}
 
 impl ClaimPrizeEntry {
-    pub(crate) fn claim_prize(ctx: Context<ClaimPrize>, is_no_prize: bool) -> Result<()> {
+    pub(crate) fn claim_prize(ctx: Context<ClaimPrize>, with_prize: bool) -> Result<()> {
         let lottery_pool_account_info = ctx.accounts.lottery_pool.to_account_info();
         let user_lottery = &mut ctx.accounts.user_lottery;
         let lottery_pool = &mut ctx.accounts.lottery_pool;
@@ -58,7 +58,7 @@ impl ClaimPrizeEntry {
         lottery_pool.claimed_count += 1;
 
         let prize = 0;
-        if !is_no_prize {
+        if with_prize {
             let prize = lottery_pool.calculate_prize(user_lottery.balance);
             require!(prize > 0, JoGoLotteryErrorCode::NoPrize);
             require!(
@@ -81,7 +81,10 @@ impl ClaimPrizeEntry {
                 seeds,
             )?;
         } else {
-            require!(lottery_pool.votes_prize[lottery_pool.winning_number as usize] == 0, JoGoLotteryErrorCode::InvalidVotePrize);
+            require!(
+                lottery_pool.votes_prize[lottery_pool.winning_number as usize] == 0,
+                JoGoLotteryErrorCode::InvalidVotePrize
+            );
         }
 
         emit!(ClaimPrizeEvent {
