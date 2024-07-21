@@ -331,7 +331,7 @@ export type JogoLottery = {
             };
           },
           {
-            name: "votesCount";
+            name: "votesAmount";
             type: {
               array: ["u64", 16];
             };
@@ -372,6 +372,10 @@ export type JogoLottery = {
           },
           {
             name: "balance";
+            type: "u64";
+          },
+          {
+            name: "amount";
             type: "u64";
           },
           {
@@ -981,7 +985,7 @@ export const IDL: JogoLottery = {
             },
           },
           {
-            name: "votesCount",
+            name: "votesAmount",
             type: {
               array: ["u64", 16],
             },
@@ -1022,6 +1026,10 @@ export const IDL: JogoLottery = {
           },
           {
             name: "balance",
+            type: "u64",
+          },
+          {
+            name: "amount",
             type: "u64",
           },
           {
