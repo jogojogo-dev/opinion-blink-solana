@@ -88,8 +88,8 @@ impl InitLotteryPoolEntry {
         lottery_pool.prize = 0;
         lottery_pool.bonus_prize = 0;
         lottery_pool.claimed_prize = 0;
-        lottery_pool.votes_count = [0; MAX_VOTE_NUMBERS];
         lottery_pool.votes_prize = [0; MAX_VOTE_NUMBERS];
+        lottery_pool.votes_amount = [0; MAX_VOTE_NUMBERS];
         lottery_pool.claimed_count = 0;
         lottery_pool.entry_lottery_price = entry_lottery_price;
         lottery_pool.lottery_fee = lottery_fee;

@@ -57,7 +57,7 @@ impl ClaimPrizeEntry {
         user_lottery.is_claimed = true;
         lottery_pool.claimed_count += 1;
 
-        let prize = lottery_pool.calculate_prize(user_lottery.balance);
+        let prize = lottery_pool.calculate_prize(user_lottery.amount);
         require!(prize > 0, JoGoLotteryErrorCode::NoPrize);
         require!(
             prize + lottery_pool.claimed_prize <= lottery_pool.bonus_prize + lottery_pool.prize,

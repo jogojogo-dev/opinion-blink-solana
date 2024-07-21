@@ -332,7 +332,7 @@ describe("jogo-lottery", () => {
       );
       let prize = lotteryPoolData.prize;
       let bonusPrize = lotteryPoolData.bonusPrize;
-      let votesPrize = lotteryPoolData.votesPrize;
+      let votesAmount = lotteryPoolData.votesAmount;
       for (let i = 0; i < userNumbers; i++) {
         let userLottery: anchor.web3.PublicKey;
         try {
@@ -349,7 +349,7 @@ describe("jogo-lottery", () => {
           const userLotteryData = await program.account.userLottery.fetch(
             userLotteryPDA
           );
-          if (userLotteryData.balance.toNumber() == 0) continue;
+          if (userLotteryData.amount.toNumber() == 0) continue;
           userLottery = userLotteryPDA;
         } catch (e) {
           continue;
@@ -379,9 +379,9 @@ describe("jogo-lottery", () => {
         const userLotteryData = await program.account.userLottery.fetch(
           userLottery
         );
-        const claimedReward = userLotteryData.balance
+        const claimedReward = userLotteryData.amount
           .mul(prize.add(bonusPrize))
-          .div(votesPrize[lotteryPoolData.winningNumber.toNumber()]);
+          .div(votesAmount[lotteryPoolData.winningNumber.toNumber()]);
         const actualReward = claimedReward.sub(
           claimedReward.mul(new anchor.BN(fee)).div(new anchor.BN(1000))
         );
@@ -743,7 +743,7 @@ describe("jogo-lottery", () => {
       );
       let prize = lotteryPoolData.prize;
       let bonusPrize = lotteryPoolData.bonusPrize;
-      let votesPrize = lotteryPoolData.votesPrize;
+      let votesAmount = lotteryPoolData.votesAmount;
       for (let i = 0; i < userNumbers; i++) {
         let userLottery: anchor.web3.PublicKey;
         try {
@@ -760,7 +760,7 @@ describe("jogo-lottery", () => {
           const userLotteryData = await program.account.userLottery.fetch(
             userLotteryPDA
           );
-          if (userLotteryData.balance.toNumber() == 0) continue;
+          if (userLotteryData.amount.toNumber() == 0) continue;
           userLottery = userLotteryPDA;
         } catch (e) {
           continue;
@@ -790,9 +790,9 @@ describe("jogo-lottery", () => {
         const userLotteryData = await program.account.userLottery.fetch(
           userLottery
         );
-        const claimedReward = userLotteryData.balance
+        const claimedReward = userLotteryData.amount
           .mul(prize.add(bonusPrize))
-          .div(votesPrize[lotteryPoolData.winningNumber.toNumber()]);
+          .div(votesAmount[lotteryPoolData.winningNumber.toNumber()]);
         const actualReward = claimedReward.sub(
           claimedReward.mul(new anchor.BN(fee)).div(new anchor.BN(1000))
         );

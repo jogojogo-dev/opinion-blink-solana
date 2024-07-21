@@ -1,12 +1,12 @@
-use anchor_lang::prelude::*;
-use anchor_lang::{event, Accounts};
-use anchor_spl::token::{Mint, Token, TokenAccount};
-use std::str::FromStr;
-
 use crate::error::JoGoLotteryErrorCode;
 use crate::instructions::utils::{transfer_sol, transfer_spl, wrap_sol};
 use crate::state::{LotteryPool, UserLottery};
 use crate::{generate_seeds, LOTTERY_POOL, USER_LOTTERY, WRAPPED_SOL};
+use anchor_lang::prelude::*;
+use anchor_lang::solana_program::vote::instruction::vote;
+use anchor_lang::{event, Accounts};
+use anchor_spl::token::{Mint, Token, TokenAccount};
+use std::str::FromStr;
 
 #[derive(Accounts)]
 #[instruction(vote_number: u64)]
@@ -76,7 +76,6 @@ impl EnterLotteryPoolEntry {
             user_lottery.lottery_pool = lottery_pool.key();
             user_lottery.is_claimed = false;
             user_lottery.claimed_prize = 0;
-            lottery_pool.votes_count[vote_number as usize] += 1;
         } else {
             // check if the user has already entered the lottery pool
             require!(
@@ -132,7 +131,9 @@ impl EnterLotteryPoolEntry {
 
             lottery_pool.prize += total_cost;
             lottery_pool.votes_prize[vote_number as usize] += total_cost;
+            lottery_pool.votes_amount[vote_number as usize] += buy_lottery_numbers;
             user_lottery.balance += total_cost;
+            user_lottery.amount += buy_lottery_numbers;
         }
 
         emit!(EnterLotteryPoolEvent {
