@@ -62,10 +62,7 @@ impl InitLotteryPoolEntry {
             maximum_number <= MAX_VOTE_NUMBERS as u64,
             JoGoLotteryErrorCode::MaxVoteNumberExceed
         );
-        require!(
-            lottery_fee > 0 && lottery_fee < 1000,
-            JoGoLotteryErrorCode::InvalidLotteryFee
-        );
+        require!(lottery_fee < 1000, JoGoLotteryErrorCode::InvalidLotteryFee);
         Ok(())
     }
 
