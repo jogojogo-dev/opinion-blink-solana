@@ -47,7 +47,9 @@ async function main() {
       systemProgram: anchor.web3.SystemProgram.programId,
     })
     .signers([admin.payer])
-    .rpc();
+    .rpc({
+      commitment: "confirmed"
+    });
   console.log("Initialize transaction signature", tx);
 }
 
