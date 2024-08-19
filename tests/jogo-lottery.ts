@@ -620,7 +620,7 @@ describe("jogo-lottery", () => {
     it("Multiple buy lottery with spl", async () => {
       for (let i = 0; i < userNumbers; i++) {
         userCostTotal += price;
-        const randomVoteNumber = Math.floor(Math.random() * 4) + 1;
+        const randomVoteNumber = Math.floor(Math.random() * maximumNumber) + 1;
         const [userLotteryPDA, _] =
           anchor.web3.PublicKey.findProgramAddressSync(
             [
@@ -682,7 +682,7 @@ describe("jogo-lottery", () => {
         await program.provider.connection.getTokenAccountBalance(
           recipientTokenAccount.address
         );
-      let randomWinningNumber = Math.floor(Math.random() * 4) + 1;
+      let randomWinningNumber = Math.floor(Math.random() * maximumNumber) + 1;
 
       assert.equal(
         Number(recipientBalanceBefore.value.amount),
@@ -869,7 +869,7 @@ describe("jogo-lottery", () => {
       ],
       program.programId
     );
-    const maximumNumber = 4;
+    const maximumNumber = 12;
     const price = 0;
     const fee = 0;
 
@@ -943,7 +943,7 @@ describe("jogo-lottery", () => {
         await provider.connection.getBalance(vaultTokenAccount.address);
       for (let i = 0; i < userNumbers; i++) {
         userCostTotal += price;
-        const randomVoteNumber = Math.floor(Math.random() * 4) + 1;
+        const randomVoteNumber = Math.floor(Math.random() * maximumNumber) + 1;
         const [userLotteryPDA, _] =
           anchor.web3.PublicKey.findProgramAddressSync(
             [
@@ -1011,7 +1011,7 @@ describe("jogo-lottery", () => {
         await program.provider.connection.getTokenAccountBalance(
           recipientTokenAccount.address
         );
-      let randomWinningNumber = Math.floor(Math.random() * 4) + 1;
+      let randomWinningNumber = Math.floor(Math.random() * maximumNumber) + 1;
 
       assert.equal(
         Number(recipientBalanceBefore.value.amount),
